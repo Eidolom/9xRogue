@@ -313,6 +313,13 @@ export const [GameContext, useGame] = createContextHook(() => {
         corruptionToAdd = Math.floor(corruptionToAdd * 0.5);
       }
       
+      const corruptedCore = gameState.upgrades.find(u => u.effect === 'corrupt_gold');
+      if (corruptedCore && mistakesToAdd > 0) {
+        const goldBonus = mistakesToAdd * 10;
+        newCurrency += goldBonus;
+        console.log(`[CorruptedCore] Gained ${goldBonus} gold from ${mistakesToAdd} mistakes`);
+      }
+      
       let mistakesNeutralized = 0;
       for (let i = 0; i < newUpgrades.length; i++) {
         const upgrade = newUpgrades[i];
@@ -335,15 +342,25 @@ export const [GameContext, useGame] = createContextHook(() => {
         setRunMistakes(prev => prev + validationResult.mistakes);
         
         const noSpread = gameState.upgrades.find(u => u.effect === 'no_spread');
-        if (!noSpread) {
+        const hazmatSuit = gameState.upgrades.find(u => u.effect === 'first_mistake_safe');
+        const isFirstMistakeInPuzzle = gameState.mistakes === 0 && hazmatSuit;
+        const corruptedCore = gameState.upgrades.find(u => u.effect === 'corrupt_gold');
+        
+        if (!noSpread && !isFirstMistakeInPuzzle) {
           for (const validatedMove of toValidate) {
             const isCorrect = gameState.solution[validatedMove.row][validatedMove.col] === validatedMove.value;
             if (!isCorrect) {
-              const spreadResult = spreadCorruption(newGrid, validatedMove.row, validatedMove.col, mistakesToAdd, newCorruption);
+              let spreadMultiplier = 1;
+              if (corruptedCore) {
+                spreadMultiplier = 2;
+              }
+              const spreadResult = spreadCorruption(newGrid, validatedMove.row, validatedMove.col, mistakesToAdd * spreadMultiplier, newCorruption);
               newGrid = spreadResult.grid;
               newCorruption += spreadResult.corruptionAdded;
             }
           }
+        } else if (isFirstMistakeInPuzzle) {
+          console.log('[HazmatSuit] First mistake - no corruption spread');
         }
       }
     }
@@ -395,6 +412,15 @@ export const [GameContext, useGame] = createContextHook(() => {
     }
     
     const isCorrectPlacement = gameState.solution[row][col] === num;
+    
+    const goldenDie = gameState.upgrades.find(u => u.effect === 'golden_number');
+    if (goldenDie && isCorrectPlacement) {
+      const goldenNumber = goldenDie.number || Math.floor(Math.random() * 9) + 1;
+      if (num === goldenNumber) {
+        newCurrency += 1;
+        console.log(`[GoldenDie] Placed golden number ${goldenNumber}! +1 gold`);
+      }
+    }
     
     if (isCorrectPlacement) {
       const numberUpgrades = gameState.upgrades.filter(
@@ -603,9 +629,15 @@ export const [GameContext, useGame] = createContextHook(() => {
     };
 
     let maxMistakesBonus = 0;
-    if (upgrade.effect === 'max_mistakes' || upgrade.id === 'mistake_insurance' || upgrade.id === 'run_mistake_insurance') {
-      maxMistakesBonus = 2;
-      console.log('[Purchase] Second Chance purchased - increasing max mistakes by 2');
+    if (upgrade.effect === 'max_mistakes') {
+      maxMistakesBonus = upgrade.id.includes('reinforced_buffer') ? 1 : 2;
+      console.log(`[Purchase] ${upgrade.name} purchased - increasing max mistakes by ${maxMistakesBonus}`);
+    }
+    
+    if (upgrade.effect === 'golden_number') {
+      const goldenNumber = Math.floor(Math.random() * 9) + 1;
+      upgradeWithCharges.number = goldenNumber;
+      console.log(`[Purchase] Golden Die selected number: ${goldenNumber}`);
     }
 
     setGameState(prev => ({
@@ -626,12 +658,11 @@ export const [GameContext, useGame] = createContextHook(() => {
     setFloorStartTime(Date.now());
     
     let baseMaxMistakes = 3;
-    const mistakeInsuranceUpgrade = gameState.upgrades.find(
-      u => u.id === 'mistake_insurance' || u.id === 'run_mistake_insurance' || u.effect === 'max_mistakes'
-    );
-    if (mistakeInsuranceUpgrade) {
-      baseMaxMistakes += 2;
-      console.log('[NextFloor] Second Chance active - max mistakes increased to', baseMaxMistakes);
+    const maxMistakesUpgrades = gameState.upgrades.filter(u => u.effect === 'max_mistakes');
+    for (const upgrade of maxMistakesUpgrades) {
+      const bonus = upgrade.id.includes('reinforced_buffer') ? 1 : 2;
+      baseMaxMistakes += bonus;
+      console.log(`[NextFloor] ${upgrade.name} active - max mistakes increased by ${bonus}`);
     }
 
     let startCurrency = gameState.currency;
@@ -802,6 +833,12 @@ export const [GameContext, useGame] = createContextHook(() => {
         console.log('[Consumable] Healed 1 mistake');
         break;
       }
+      
+      case 'shield_next':
+      case 'discount_next': {
+        console.log(`[Consumable] ${consumable.name} will take effect automatically`);
+        break;
+      }
 
       case 'solve_tile': {
         if (!gameState.selectedCell) {
@@ -826,6 +863,62 @@ export const [GameContext, useGame] = createContextHook(() => {
           isHidden: false,
         };
         console.log(`[Consumable] Solved cell at (${row}, ${col}) with value ${gameState.solution[row][col]}`);
+        break;
+      }
+      
+      case 'clear_fog': {
+        newGrid = newGrid.map(row => row.map(cell => ({
+          ...cell,
+          isFogged: false,
+          candidates: [],
+        })));
+        console.log('[Consumable] Glimmercap - cleared all fog and phantom candidates');
+        break;
+      }
+      
+      case 'cleanse_box': {
+        if (!gameState.selectedCell) {
+          console.log('[Consumable] No cell selected for box cleansing');
+          return;
+        }
+        const { row, col } = gameState.selectedCell;
+        const boxRow = Math.floor(row / 3) * 3;
+        const boxCol = Math.floor(col / 3) * 3;
+        
+        for (let i = boxRow; i < boxRow + 3; i++) {
+          for (let j = boxCol; j < boxCol + 3; j++) {
+            newGrid[i][j] = {
+              ...newGrid[i][j],
+              corruption: 0,
+              isFogged: false,
+              isHidden: false,
+            };
+          }
+        }
+        console.log('[Consumable] Purifying Salt - cleansed 3x3 box');
+        break;
+      }
+      
+      case 'solve_random': {
+        const emptyCells: Array<{ row: number; col: number }> = [];
+        for (let i = 0; i < 9; i++) {
+          for (let j = 0; j < 9; j++) {
+            if (newGrid[i][j].value === null && !newGrid[i][j].isFixed) {
+              emptyCells.push({ row: i, col: j });
+            }
+          }
+        }
+        
+        if (emptyCells.length > 0) {
+          const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+          newGrid[randomCell.row][randomCell.col] = {
+            ...newGrid[randomCell.row][randomCell.col],
+            value: gameState.solution[randomCell.row][randomCell.col],
+            isCorrect: true,
+            isFixed: true,
+          };
+          console.log('[Consumable] Logical Leap - solved random cell');
+        }
         break;
       }
 

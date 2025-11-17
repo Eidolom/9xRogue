@@ -2,9 +2,9 @@ import { ShopOffer, ShopSession, Rarity } from '@/types/shop';
 import { 
   NUMBER_UPGRADES, 
   RELICS_PERMANENT, 
-  RELICS_RUN, 
+  ARTIFACTS, 
   CONSUMABLES, 
-  RULE_MUTATORS
+  SERVICES
 } from '@/constants/shopOffers';
 
 class SeededRandom {
@@ -112,10 +112,10 @@ function generateSlot2(
   const roll = rng.next();
   
   let pool: ShopOffer[];
-  if (roll < 0.70) {
+  if (roll < 0.40) {
     pool = CONSUMABLES;
-  } else if (roll < 0.95) {
-    pool = RELICS_RUN;
+  } else if (roll < 0.85) {
+    pool = ARTIFACTS;
   } else {
     pool = RELICS_PERMANENT;
   }
@@ -131,7 +131,14 @@ function generateSlot3(
 ): ShopOffer | null {
   const roll = rng.next();
   
-  const pool = roll < 0.50 ? NUMBER_UPGRADES : RULE_MUTATORS;
+  let pool: ShopOffer[];
+  if (roll < 0.40) {
+    pool = NUMBER_UPGRADES;
+  } else if (roll < 0.70) {
+    pool = CONSUMABLES;
+  } else {
+    pool = SERVICES;
+  }
   return selectOfferByRarity(pool, rng, excludeIds, ownedIds, guaranteeRarity);
 }
 
