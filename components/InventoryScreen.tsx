@@ -1,25 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X, Zap, Sparkles, Package, Eye, DollarSign, Laugh, Shield, Dices, Target, PowerIcon, Trophy } from 'lucide-react-native';
+import { X, Zap, Sparkles, Package } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useGame } from '@/contexts/GameContext';
 import { Upgrade } from '@/types/game';
 import { COLORS, BORDER } from '@/constants/theme';
 import CRTBackground from './CRTBackground';
+import PixelIcon from './PixelIcon';
 
-const NUMBER_ICONS = [
-  null,
-  Eye,
-  DollarSign,
-  Laugh,
-  Shield,
-  Zap,
-  Dices,
-  Target,
-  PowerIcon,
-  Trophy,
-] as const;
+
 
 interface InventoryScreenProps {
   visible: boolean;
@@ -68,7 +58,6 @@ export default function InventoryScreen({ visible, onClose }: InventoryScreenPro
   const renderUpgradeCard = (upgrade: Upgrade, index: number) => {
     const rarityColor = getRarityColor(upgrade.rarity);
     const rarityBg = getRarityBg(upgrade.rarity);
-    const Icon = upgrade.type === 'number' && upgrade.number ? NUMBER_ICONS[upgrade.number] : null;
 
     return (
       <TouchableOpacity
@@ -81,9 +70,9 @@ export default function InventoryScreen({ visible, onClose }: InventoryScreenPro
           <View style={[styles.rarityBadge, { backgroundColor: rarityColor }]}>
             <Text style={styles.rarityText}>{upgrade.rarity.toUpperCase()}</Text>
           </View>
-          {Icon && (
+          {upgrade.type === 'number' && upgrade.number && (
             <View style={[styles.iconBadge, { backgroundColor: rarityColor }]}>
-              <Icon size={14} color="#000000" />
+              <PixelIcon number={upgrade.number} size={20} color="#000000" />
             </View>
           )}
         </View>

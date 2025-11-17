@@ -16,6 +16,7 @@ import {
 } from '@/utils/shop';
 import { Upgrade } from '@/types/game';
 import CRTBackground from './CRTBackground';
+import PixelIcon from './PixelIcon';
 import { COLORS, BORDER } from '@/constants/theme';
 
 export default function ShopScreen() {
@@ -345,6 +346,11 @@ export default function ShopScreen() {
                     <View style={[styles.rarityBadge, { backgroundColor: rarityColor }]}>
                       <Text style={styles.rarityText}>{offer.rarity.toUpperCase()}</Text>
                     </View>
+                    {offer.type === 'NumberUpgrade' && offer.digit && (
+                      <View style={[styles.iconBadge, { backgroundColor: rarityColor }]}>
+                        <PixelIcon number={offer.digit} size={20} color="#000000" />
+                      </View>
+                    )}
                   </View>
 
                   <View style={styles.cardBody}>
@@ -584,6 +590,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(196, 76, 196, 0.1)',
   },
   cardHeader: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
     marginBottom: 12,
   },
   rarityBadge: {
@@ -599,6 +608,14 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
     letterSpacing: 1,
+  },
+  iconBadge: {
+    width: 24,
+    height: 24,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    borderWidth: BORDER.medium,
+    borderColor: COLORS.background.primary,
   },
   cardBody: {
     marginBottom: 12,
