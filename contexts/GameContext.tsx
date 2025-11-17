@@ -532,9 +532,12 @@ export const [GameContext, useGame] = createContextHook(() => {
   const completeFloor = useCallback(() => {
     let reward = 50 + (gameState.floor * 20);
     
-    const goldenTouchUpgrade = gameState.upgrades.find(u => u.id === 'golden_touch');
+    const goldenTouchUpgrade = gameState.upgrades.find(
+      u => u.id === 'golden_touch' || u.id === 'run_golden_touch' || u.effect === 'currency_multiplier'
+    );
     if (goldenTouchUpgrade) {
       reward = reward * 2;
+      console.log('[CompleteFloor] Golden Touch active - reward doubled to', reward);
     }
     
     const floorTime = (Date.now() - floorStartTime) / 1000;
@@ -599,10 +602,17 @@ export const [GameContext, useGame] = createContextHook(() => {
       charges: upgrade.maxCharges || upgrade.charges,
     };
 
+    let maxMistakesBonus = 0;
+    if (upgrade.effect === 'max_mistakes' || upgrade.id === 'mistake_insurance' || upgrade.id === 'run_mistake_insurance') {
+      maxMistakesBonus = 2;
+      console.log('[Purchase] Second Chance purchased - increasing max mistakes by 2');
+    }
+
     setGameState(prev => ({
       ...prev,
       currency: prev.currency - upgrade.cost,
       upgrades: [...prev.upgrades, upgradeWithCharges],
+      maxMistakes: prev.maxMistakes + maxMistakesBonus,
     }));
   }, [gameState.currency, gameState.upgrades, stats]);
 
@@ -616,9 +626,12 @@ export const [GameContext, useGame] = createContextHook(() => {
     setFloorStartTime(Date.now());
     
     let baseMaxMistakes = 3;
-    const mistakeInsuranceUpgrade = gameState.upgrades.find(u => u.id === 'mistake_insurance');
+    const mistakeInsuranceUpgrade = gameState.upgrades.find(
+      u => u.id === 'mistake_insurance' || u.id === 'run_mistake_insurance' || u.effect === 'max_mistakes'
+    );
     if (mistakeInsuranceUpgrade) {
       baseMaxMistakes += 2;
+      console.log('[NextFloor] Second Chance active - max mistakes increased to', baseMaxMistakes);
     }
 
     let startCurrency = gameState.currency;
