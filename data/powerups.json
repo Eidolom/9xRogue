@@ -1,0 +1,587 @@
+[
+  {
+    "id": "num_1_common",
+    "digit": 1,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "purify",
+    "params": { "scope": "row", "amount": 5 },
+    "description": "Slightly reduces corruption chance in its row",
+    "acceptance": {
+      "unitTests": ["num_1_common_reduces_corruption"],
+      "integrationTests": ["num_1_common_integration"]
+    }
+  },
+  {
+    "id": "num_1_uncommon",
+    "digit": 1,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "purify",
+    "params": { "scope": "row", "cells": 1 },
+    "description": "Cleans one corrupted cell in its row",
+    "acceptance": {
+      "unitTests": ["num_1_uncommon_cleans_one"],
+      "integrationTests": ["num_1_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_1_rare",
+    "digit": 1,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "purify",
+    "params": { "scope": "row", "cells": "all" },
+    "description": "Cleans all corruption in its row",
+    "acceptance": {
+      "unitTests": ["num_1_rare_cleans_all"],
+      "integrationTests": ["num_1_rare_integration"]
+    }
+  },
+  {
+    "id": "num_1_epic",
+    "digit": 1,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "purify",
+    "params": { "scope": "rowcol", "cells": "all" },
+    "description": "Cleans row and column",
+    "acceptance": {
+      "unitTests": ["num_1_epic_cleans_rowcol"],
+      "integrationTests": ["num_1_epic_integration"]
+    }
+  },
+  {
+    "id": "num_1_rogue",
+    "digit": 1,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "purify",
+    "params": { "scope": "global", "cells": 1 },
+    "description": "Auto-purifies most corrupted cell at level start",
+    "acceptance": {
+      "unitTests": ["num_1_rogue_auto"],
+      "integrationTests": ["num_1_rogue_integration"]
+    }
+  },
+  {
+    "id": "num_2_common",
+    "digit": 2,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "revealCandidate",
+    "params": { "digit": 2, "count": 1 },
+    "description": "Reveals one correct candidate for 2",
+    "acceptance": {
+      "unitTests": ["num_2_common_reveal"],
+      "integrationTests": ["num_2_common_integration"]
+    }
+  },
+  {
+    "id": "num_2_uncommon",
+    "digit": 2,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "autoPlace",
+    "params": { "digit": 2, "count": 1 },
+    "description": "Automatically places one extra correct 2 on the board",
+    "acceptance": {
+      "unitTests": ["num_2_uncommon_autoplaces"],
+      "integrationTests": ["num_2_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_2_rare",
+    "digit": 2,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "autoPlace",
+    "params": { "digit": 2, "count": 2 },
+    "description": "Places two extra 2s per level",
+    "acceptance": {
+      "unitTests": ["num_2_rare_autoplaces"],
+      "integrationTests": ["num_2_rare_integration"]
+    }
+  },
+  {
+    "id": "num_2_epic",
+    "digit": 2,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "autoPlace",
+    "params": { "digit": 2, "count": 3 },
+    "description": "Places three extra 2s per level",
+    "acceptance": {
+      "unitTests": ["num_2_epic_autoplaces"],
+      "integrationTests": ["num_2_epic_integration"]
+    }
+  },
+  {
+    "id": "num_2_rogue",
+    "digit": 2,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "autoPlace",
+    "params": { "digit": 2, "count": 1 },
+    "description": "Auto-places one correct 2 at level start",
+    "acceptance": {
+      "unitTests": ["num_2_rogue_auto"],
+      "integrationTests": ["num_2_rogue_integration"]
+    }
+  },
+  {
+    "id": "num_3_common",
+    "digit": 3,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "lockBox",
+    "params": { "boxEffect": "slowSpread", "amountPct": 10 },
+    "description": "Slightly slows corruption in its 3x3 box",
+    "acceptance": {
+      "unitTests": ["num_3_common_slow"],
+      "integrationTests": ["num_3_common_integration"]
+    }
+  },
+  {
+    "id": "num_3_uncommon",
+    "digit": 3,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "lockBox",
+    "params": { "boxLock": true, "durationMoves": 1 },
+    "description": "Prevents corruption in its box for the next placement",
+    "acceptance": {
+      "unitTests": ["num_3_uncommon_lock"],
+      "integrationTests": ["num_3_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_3_rare",
+    "digit": 3,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "lockBox",
+    "params": { "boxLock": true, "durationMoves": 3 },
+    "description": "Locks the 3x3 box from corruption for three placements",
+    "acceptance": {
+      "unitTests": ["num_3_rare_lock"],
+      "integrationTests": ["num_3_rare_integration"]
+    }
+  },
+  {
+    "id": "num_3_epic",
+    "digit": 3,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "lockBox",
+    "params": { "boxLock": true, "durationMoves": 5, "affectRow": true },
+    "description": "Locks box and row temporarily",
+    "acceptance": {
+      "unitTests": ["num_3_epic_lock"],
+      "integrationTests": ["num_3_epic_integration"]
+    }
+  },
+  {
+    "id": "num_3_rogue",
+    "digit": 3,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "lockBox",
+    "params": { "boxLock": true, "durationMoves": 3 },
+    "description": "Auto-locks box at level start",
+    "acceptance": {
+      "unitTests": ["num_3_rogue_auto"],
+      "integrationTests": ["num_3_rogue_integration"]
+    }
+  },
+  {
+    "id": "num_4_common",
+    "digit": 4,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "forbidSlots",
+    "params": { "count": 1 },
+    "description": "Marks one slot where other 4s cannot go",
+    "acceptance": {
+      "unitTests": ["num_4_common_forbid"],
+      "integrationTests": ["num_4_common_integration"]
+    }
+  },
+  {
+    "id": "num_4_uncommon",
+    "digit": 4,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "forbidSlots",
+    "params": { "count": 2 },
+    "description": "Marks two forbidden slots",
+    "acceptance": {
+      "unitTests": ["num_4_uncommon_forbid"],
+      "integrationTests": ["num_4_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_4_rare",
+    "digit": 4,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "forbidSlots",
+    "params": { "count": 3 },
+    "description": "Marks three forbidden slots per floor",
+    "acceptance": {
+      "unitTests": ["num_4_rare_forbid"],
+      "integrationTests": ["num_4_rare_integration"]
+    }
+  },
+  {
+    "id": "num_4_epic",
+    "digit": 4,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "forbidSlots",
+    "params": { "count": 4 },
+    "description": "Marks four forbidden slots per floor",
+    "acceptance": {
+      "unitTests": ["num_4_epic_forbid"],
+      "integrationTests": ["num_4_epic_integration"]
+    }
+  },
+  {
+    "id": "num_4_rogue",
+    "digit": 4,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "forbidSlots",
+    "params": { "count": 1 },
+    "description": "Auto-marks one critical forbidden slot at level start",
+    "acceptance": {
+      "unitTests": ["num_4_rogue_auto"],
+      "integrationTests": ["num_4_rogue_integration"]
+    }
+  },
+  {
+    "id": "num_5_common",
+    "digit": 5,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "resolveAmbiguity",
+    "params": { "scope": "row", "count": 1 },
+    "description": "Reveals one correct cell in its row",
+    "acceptance": {
+      "unitTests": ["num_5_common_reveal"],
+      "integrationTests": ["num_5_common_integration"]
+    }
+  },
+  {
+    "id": "num_5_uncommon",
+    "digit": 5,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "resolveAmbiguity",
+    "params": { "scope": "col", "count": 1 },
+    "description": "Reveals one correct cell in its column",
+    "acceptance": {
+      "unitTests": ["num_5_uncommon_reveal"],
+      "integrationTests": ["num_5_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_5_rare",
+    "digit": 5,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "resolveAmbiguity",
+    "params": { "scope": "global", "count": 1 },
+    "description": "Resolves one ambiguous cell anywhere",
+    "acceptance": {
+      "unitTests": ["num_5_rare_resolve"],
+      "integrationTests": ["num_5_rare_integration"]
+    }
+  },
+  {
+    "id": "num_5_epic",
+    "digit": 5,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "resolveAmbiguity",
+    "params": { "scope": "global", "count": 2 },
+    "description": "Resolves two ambiguous cells anywhere",
+    "acceptance": {
+      "unitTests": ["num_5_epic_resolve"],
+      "integrationTests": ["num_5_epic_integration"]
+    }
+  },
+  {
+    "id": "num_5_rogue",
+    "digit": 5,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "resolveAmbiguity",
+    "params": { "scope": "global", "count": 1 },
+    "description": "Auto-resolves one ambiguous cell at level start",
+    "acceptance": {
+      "unitTests": ["num_5_rogue_auto"],
+      "integrationTests": ["num_5_rogue_integration"]
+    }
+  },
+  {
+    "id": "num_6_common",
+    "digit": 6,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "cleanAnywhere",
+    "params": { "amount": 3 },
+    "description": "Slightly reduces corruption spread nearby",
+    "acceptance": {
+      "unitTests": ["num_6_common_reduce"],
+      "integrationTests": ["num_6_common_integration"]
+    }
+  },
+  {
+    "id": "num_6_uncommon",
+    "digit": 6,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "cleanAnywhere",
+    "params": { "cells": 1 },
+    "description": "Cleans one corrupted cell in its box",
+    "acceptance": {
+      "unitTests": ["num_6_uncommon_clean"],
+      "integrationTests": ["num_6_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_6_rare",
+    "digit": 6,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "cleanAnywhere",
+    "params": { "cells": 2 },
+    "description": "Cleans two corrupted cells anywhere on board",
+    "acceptance": {
+      "unitTests": ["num_6_rare_clean"],
+      "integrationTests": ["num_6_rare_integration"]
+    }
+  },
+  {
+    "id": "num_6_epic",
+    "digit": 6,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "cleanAnywhere",
+    "params": { "cells": 3 },
+    "description": "Cleans three corrupted cells anywhere on board",
+    "acceptance": {
+      "unitTests": ["num_6_epic_clean"],
+      "integrationTests": ["num_6_epic_integration"]
+    }
+  },
+  {
+    "id": "num_6_rogue",
+    "digit": 6,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "cleanAnywhere",
+    "params": { "cells": 1 },
+    "description": "Auto-cleans one key corrupted cell at level start",
+    "acceptance": {
+      "unitTests": ["num_6_rogue_auto"],
+      "integrationTests": ["num_6_rogue_integration"]
+    }
+  },
+  {
+    "id": "num_7_common",
+    "digit": 7,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "grantCurrency",
+    "params": { "currency": "OF", "amount": 5 },
+    "description": "Adds 5 OF on placement",
+    "acceptance": {
+      "unitTests": ["num_7_common_currency"],
+      "integrationTests": ["num_7_common_integration"]
+    }
+  },
+  {
+    "id": "num_7_uncommon",
+    "digit": 7,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "grantCurrency",
+    "params": { "currency": "OF", "amount": 12 },
+    "description": "Adds 12 OF per placement",
+    "acceptance": {
+      "unitTests": ["num_7_uncommon_currency"],
+      "integrationTests": ["num_7_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_7_rare",
+    "digit": 7,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "grantCurrency",
+    "params": { "currency": "OF", "amount": 25, "alsoHint": true },
+    "description": "Adds 25 OF and reduces one pending corruption cell slightly",
+    "acceptance": {
+      "unitTests": ["num_7_rare_currency_hint"],
+      "integrationTests": ["num_7_rare_integration"]
+    }
+  },
+  {
+    "id": "num_7_epic",
+    "digit": 7,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "grantCurrency",
+    "params": { "currency": "OF", "amount": 45, "cleanCell": 1 },
+    "description": "Adds 45 OF and cleans one minor corrupted cell",
+    "acceptance": {
+      "unitTests": ["num_7_epic_currency_clean"],
+      "integrationTests": ["num_7_epic_integration"]
+    }
+  },
+  {
+    "id": "num_7_rogue",
+    "digit": 7,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "grantCurrency",
+    "params": { "currency": "OF", "amount": 20 },
+    "description": "Auto-grants 20 OF bonus at level start",
+    "acceptance": {
+      "unitTests": ["num_7_rogue_auto"],
+      "integrationTests": ["num_7_rogue_integration"]
+    }
+  },
+  {
+    "id": "num_8_common",
+    "digit": 8,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "clearPhantom",
+    "params": { "phantomCount": 1 },
+    "description": "Reveals one candidate for any number in its box",
+    "acceptance": {
+      "unitTests": ["num_8_common_clear"],
+      "integrationTests": ["num_8_common_integration"]
+    }
+  },
+  {
+    "id": "num_8_uncommon",
+    "digit": 8,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "clearPhantom",
+    "params": { "phantomCount": 2 },
+    "description": "Reveals two candidates in the box",
+    "acceptance": {
+      "unitTests": ["num_8_uncommon_clear"],
+      "integrationTests": ["num_8_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_8_rare",
+    "digit": 8,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "clearPhantom",
+    "params": { "phantomCount": 3 },
+    "description": "Removes one phantom candidate from corrupted cells",
+    "acceptance": {
+      "unitTests": ["num_8_rare_clear"],
+      "integrationTests": ["num_8_rare_integration"]
+    }
+  },
+  {
+    "id": "num_8_epic",
+    "digit": 8,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "clearPhantom",
+    "params": { "phantomCount": 4 },
+    "description": "Removes two phantom candidates from corrupted cells",
+    "acceptance": {
+      "unitTests": ["num_8_epic_clear"],
+      "integrationTests": ["num_8_epic_integration"]
+    }
+  },
+  {
+    "id": "num_8_rogue",
+    "digit": 8,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "clearPhantom",
+    "params": { "phantomCount": 1 },
+    "description": "Auto-clears one phantom candidate at level start",
+    "acceptance": {
+      "unitTests": ["num_8_rogue_auto"],
+      "integrationTests": ["num_8_rogue_integration"]
+    }
+  },
+  {
+    "id": "num_9_common",
+    "digit": 9,
+    "rarity": "Common",
+    "autoTrigger": false,
+    "effectKey": "neutralizeMistake",
+    "params": { "count": 1 },
+    "description": "Neutralizes the next single mistake",
+    "acceptance": {
+      "unitTests": ["num_9_common_neutralize"],
+      "integrationTests": ["num_9_common_integration"]
+    }
+  },
+  {
+    "id": "num_9_uncommon",
+    "digit": 9,
+    "rarity": "Uncommon",
+    "autoTrigger": false,
+    "effectKey": "neutralizeMistake",
+    "params": { "count": 2 },
+    "description": "Neutralizes the next two mistakes",
+    "acceptance": {
+      "unitTests": ["num_9_uncommon_neutralize"],
+      "integrationTests": ["num_9_uncommon_integration"]
+    }
+  },
+  {
+    "id": "num_9_rare",
+    "digit": 9,
+    "rarity": "Rare",
+    "autoTrigger": false,
+    "effectKey": "neutralizeMistake",
+    "params": { "count": 3 },
+    "description": "Neutralizes the next three mistakes",
+    "acceptance": {
+      "unitTests": ["num_9_rare_neutralize"],
+      "integrationTests": ["num_9_rare_integration"]
+    }
+  },
+  {
+    "id": "num_9_epic",
+    "digit": 9,
+    "rarity": "Epic",
+    "autoTrigger": false,
+    "effectKey": "neutralizeMistake",
+    "params": { "count": 5 },
+    "description": "Neutralizes the next five mistakes",
+    "acceptance": {
+      "unitTests": ["num_9_epic_neutralize"],
+      "integrationTests": ["num_9_epic_integration"]
+    }
+  },
+  {
+    "id": "num_9_rogue",
+    "digit": 9,
+    "rarity": "Rogue",
+    "autoTrigger": true,
+    "effectKey": "neutralizeMistake",
+    "params": { "count": 1 },
+    "description": "Auto-neutralizes one mistake at level start",
+    "acceptance": {
+      "unitTests": ["num_9_rogue_auto"],
+      "integrationTests": ["num_9_rogue_integration"]
+    }
+  }
+]
