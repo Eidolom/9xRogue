@@ -9,7 +9,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 1,
     effect: 'scout_clear_fog_box',
     cost: 40,
-    rarity: 'common',
   },
   {
     id: 'num_1_l2',
@@ -19,7 +18,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 1,
     effect: 'scout_clear_fog_rowcol',
     cost: 120,
-    rarity: 'uncommon',
   },
   {
     id: 'num_1_l3',
@@ -29,7 +27,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 1,
     effect: 'scout_remove_phantoms_box',
     cost: 300,
-    rarity: 'rare',
   },
   {
     id: 'num_1_l4',
@@ -39,7 +36,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 1,
     effect: 'scout_reveal_hidden_rowcol',
     cost: 500,
-    rarity: 'epic',
   },
   {
     id: 'num_1_l5',
@@ -49,7 +45,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 1,
     effect: 'scout_total_clarity',
     cost: 800,
-    rarity: 'epic',
   },
   {
     id: 'num_1_rogue',
@@ -59,7 +54,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 1,
     effect: 'scout_omniscience',
     cost: 1200,
-    rarity: 'rogue',
   },
 
   {
@@ -70,7 +64,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 2,
     effect: 'merchant_gold_1',
     cost: 50,
-    rarity: 'common',
   },
   {
     id: 'num_2_l2',
@@ -80,7 +73,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 2,
     effect: 'merchant_gold_2',
     cost: 140,
-    rarity: 'uncommon',
   },
   {
     id: 'num_2_l3',
@@ -90,7 +82,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 2,
     effect: 'merchant_price_check',
     cost: 320,
-    rarity: 'rare',
   },
   {
     id: 'num_2_l4',
@@ -100,7 +91,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 2,
     effect: 'merchant_gold_3',
     cost: 480,
-    rarity: 'epic',
   },
   {
     id: 'num_2_l5',
@@ -110,7 +100,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 2,
     effect: 'merchant_market_crash',
     cost: 700,
-    rarity: 'epic',
   },
   {
     id: 'num_2_rogue',
@@ -120,7 +109,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 2,
     effect: 'merchant_monopoly',
     cost: 1000,
-    rarity: 'rogue',
   },
 
   {
@@ -131,7 +119,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 3,
     effect: 'jester_trio',
     cost: 45,
-    rarity: 'common',
   },
   {
     id: 'num_3_l2',
@@ -141,7 +128,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 3,
     effect: 'jester_trio_plus',
     cost: 130,
-    rarity: 'uncommon',
   },
   {
     id: 'num_3_l3',
@@ -151,7 +137,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 3,
     effect: 'jester_flow_state',
     cost: 280,
-    rarity: 'rare',
   },
   {
     id: 'num_3_l4',
@@ -161,7 +146,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 3,
     effect: 'jester_unstoppable',
     cost: 450,
-    rarity: 'epic',
   },
   {
     id: 'num_3_l5',
@@ -171,7 +155,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 3,
     effect: 'jester_full_house',
     cost: 650,
-    rarity: 'epic',
   },
   {
     id: 'num_3_rogue',
@@ -181,7 +164,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 3,
     effect: 'jester_master_flow',
     cost: 950,
-    rarity: 'rogue',
   },
 
   {
@@ -192,7 +174,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 4,
     effect: 'fortress_buffer_1',
     cost: 35,
-    rarity: 'common',
   },
   {
     id: 'num_4_l2',
@@ -202,7 +183,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 4,
     effect: 'fortress_shield_15',
     cost: 100,
-    rarity: 'uncommon',
   },
   {
     id: 'num_4_l3',
@@ -212,7 +192,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 4,
     effect: 'fortress_buffer_2',
     cost: 240,
-    rarity: 'rare',
   },
   {
     id: 'num_4_l4',
@@ -222,7 +201,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 4,
     effect: 'fortress_shield_30',
     cost: 400,
-    rarity: 'epic',
   },
   {
     id: 'num_4_l5',
@@ -232,7 +210,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 4,
     effect: 'fortress_start_shield',
     cost: 600,
-    rarity: 'epic',
   },
   {
     id: 'num_4_rogue',
@@ -242,7 +219,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 4,
     effect: 'fortress_absolution',
     cost: 900,
-    rarity: 'rogue',
   },
 
   {
@@ -253,7 +229,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 5,
     effect: 'catalyst_ignite',
     cost: 50,
-    rarity: 'common',
   },
   {
     id: 'num_5_l2',
@@ -263,7 +238,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 5,
     effect: 'catalyst_synergy',
     cost: 140,
-    rarity: 'uncommon',
   },
   {
     id: 'num_5_l3',
@@ -273,7 +247,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 5,
     effect: 'catalyst_potency',
     cost: 300,
-    rarity: 'rare',
   },
   {
     id: 'num_5_l4',
@@ -283,7 +256,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 5,
     effect: 'catalyst_catalyze',
     cost: 520,
-    rarity: 'epic',
   },
   {
     id: 'num_5_l5',
@@ -293,7 +265,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 5,
     effect: 'catalyst_fusion',
     cost: 750,
-    rarity: 'epic',
   },
   {
     id: 'num_5_rogue',
@@ -303,7 +274,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 5,
     effect: 'catalyst_overclock',
     cost: 1100,
-    rarity: 'rogue',
   },
 
   {
@@ -314,7 +284,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 6,
     effect: 'gambler_fifty_fifty',
     cost: 40,
-    rarity: 'common',
   },
   {
     id: 'num_6_l2',
@@ -324,7 +293,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 6,
     effect: 'gambler_hedge',
     cost: 120,
-    rarity: 'uncommon',
   },
   {
     id: 'num_6_l3',
@@ -334,7 +302,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 6,
     effect: 'gambler_tip_odds',
     cost: 280,
-    rarity: 'rare',
   },
   {
     id: 'num_6_l4',
@@ -344,7 +311,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 6,
     effect: 'gambler_safe_bet',
     cost: 480,
-    rarity: 'epic',
   },
   {
     id: 'num_6_l5',
@@ -354,7 +320,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 6,
     effect: 'gambler_all_in',
     cost: 700,
-    rarity: 'epic',
   },
   {
     id: 'num_6_rogue',
@@ -364,7 +329,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 6,
     effect: 'gambler_reality_warp',
     cost: 1000,
-    rarity: 'rogue',
   },
 
   {
@@ -375,7 +339,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 7,
     effect: 'sniper_reroll_1',
     cost: 50,
-    rarity: 'common',
   },
   {
     id: 'num_7_l2',
@@ -385,7 +348,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 7,
     effect: 'sniper_focus_fire',
     cost: 120,
-    rarity: 'uncommon',
   },
   {
     id: 'num_7_l3',
@@ -395,7 +357,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 7,
     effect: 'sniper_takedown',
     cost: 280,
-    rarity: 'rare',
   },
   {
     id: 'num_7_l4',
@@ -405,7 +366,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 7,
     effect: 'sniper_reroll_2',
     cost: 460,
-    rarity: 'epic',
   },
   {
     id: 'num_7_l5',
@@ -415,7 +375,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 7,
     effect: 'sniper_chain_shot',
     cost: 650,
-    rarity: 'epic',
   },
   {
     id: 'num_7_rogue',
@@ -425,7 +384,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 7,
     effect: 'sniper_domino',
     cost: 950,
-    rarity: 'rogue',
   },
 
   {
@@ -436,7 +394,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 8,
     effect: 'powerhouse_cleanse_box',
     cost: 45,
-    rarity: 'common',
   },
   {
     id: 'num_8_l2',
@@ -446,7 +403,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 8,
     effect: 'powerhouse_purge_box',
     cost: 130,
-    rarity: 'uncommon',
   },
   {
     id: 'num_8_l3',
@@ -456,7 +412,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 8,
     effect: 'powerhouse_purge_rowcol',
     cost: 300,
-    rarity: 'rare',
   },
   {
     id: 'num_8_l4',
@@ -466,7 +421,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 8,
     effect: 'powerhouse_firewall',
     cost: 500,
-    rarity: 'epic',
   },
   {
     id: 'num_8_l5',
@@ -476,7 +430,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 8,
     effect: 'powerhouse_system_restore',
     cost: 720,
-    rarity: 'epic',
   },
   {
     id: 'num_8_rogue',
@@ -486,7 +439,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 8,
     effect: 'powerhouse_purification',
     cost: 1050,
-    rarity: 'rogue',
   },
 
   {
@@ -497,7 +449,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 9,
     effect: 'finisher_box_bonus',
     cost: 60,
-    rarity: 'common',
   },
   {
     id: 'num_9_l2',
@@ -507,7 +458,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 9,
     effect: 'finisher_line_bonus',
     cost: 150,
-    rarity: 'uncommon',
   },
   {
     id: 'num_9_l3',
@@ -517,7 +467,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 9,
     effect: 'finisher_momentum',
     cost: 350,
-    rarity: 'rare',
   },
   {
     id: 'num_9_l4',
@@ -527,7 +476,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 9,
     effect: 'finisher_jackpot',
     cost: 550,
-    rarity: 'epic',
   },
   {
     id: 'num_9_l5',
@@ -537,7 +485,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 9,
     effect: 'finisher_head_start',
     cost: 800,
-    rarity: 'epic',
   },
   {
     id: 'num_9_rogue',
@@ -547,7 +494,6 @@ export const UPGRADE_POOL: Upgrade[] = [
     number: 9,
     effect: 'finisher_completionist',
     cost: 1150,
-    rarity: 'rogue',
   },
 
   {
