@@ -6,12 +6,62 @@ interface PixelIconProps {
   number: number;
   size?: number;
   color?: string;
+  iconType?: 'number' | 'potion' | 'artifact';
 }
 
-export default function PixelIcon({ number, size = 24, color = '#5DBCD2' }: PixelIconProps) {
+export default function PixelIcon({ number, size = 24, color = '#5DBCD2', iconType = 'number' }: PixelIconProps) {
   const pixelSize = size / 8;
 
   const renderPixels = () => {
+    if (iconType === 'potion') {
+      return (
+        <>
+          <Rect x={3 * pixelSize} y={1 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={2 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={2 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={2 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={3 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={3 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={3 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={1 * pixelSize} y={4 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={4 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={4 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={4 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={5 * pixelSize} y={4 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={1 * pixelSize} y={5 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={5 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={5 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={5 * pixelSize} y={5 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={6 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={6 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={6 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+        </>
+      );
+    }
+
+    if (iconType === 'artifact') {
+      return (
+        <>
+          <Rect x={3 * pixelSize} y={1 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={2 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={2 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={2 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={1 * pixelSize} y={3 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={3 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={3 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={3 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={5 * pixelSize} y={3 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={4 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={4 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={4 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={5 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={2 * pixelSize} y={6 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={3 * pixelSize} y={6 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+          <Rect x={4 * pixelSize} y={6 * pixelSize} width={pixelSize} height={pixelSize} fill={color} />
+        </>
+      );
+    }
+
     switch (number) {
       case 1:
         return (

@@ -242,19 +242,19 @@ export default function ShopScreen() {
 
   const getOfferTypeLabel = (offer: ShopOffer): string => {
     if (offer.type === 'NumberUpgrade') {
-      return `NUM ${offer.digit} • T${offer.tier}`;
+      return `NUM ${offer.digit}`;
     }
     if (offer.type === 'RelicPermanent') {
-      return 'PERMANENT RELIC';
+      return 'ARTIFACT • PERMANENT';
     }
     if (offer.type === 'RelicRun') {
-      return 'RUN RELIC';
+      return 'ARTIFACT';
     }
     if (offer.type === 'Consumable') {
       return 'CONSUMABLE';
     }
     if (offer.type === 'RuleMutator') {
-      return 'RULE MUTATOR';
+      return 'ARTIFACT';
     }
     return offer.type;
   };
@@ -331,8 +331,8 @@ export default function ShopScreen() {
                   style={[
                     styles.card,
                     {
-                      borderColor: rarityColor,
-                      backgroundColor: rarityBg,
+                      borderColor: offer.type === 'NumberUpgrade' ? COLORS.primary.cyan : rarityColor,
+                      backgroundColor: offer.type === 'NumberUpgrade' ? 'rgba(93, 188, 210, 0.08)' : rarityBg,
                       opacity: isPurchased ? 0.4 : 1,
                     },
                   ]}
@@ -343,12 +343,23 @@ export default function ShopScreen() {
                   {isCorrupted && <View style={styles.corruptedOverlay} />}
 
                   <View style={styles.cardHeader}>
-                    <View style={[styles.rarityBadge, { backgroundColor: rarityColor }]}>
-                      <Text style={styles.rarityText}>{offer.rarity.toUpperCase()}</Text>
-                    </View>
+                    {offer.type === 'NumberUpgrade' ? (
+                      <View style={[styles.levelBadge, { backgroundColor: COLORS.primary.cyan }]}>
+                        <Text style={styles.levelText}>LVL {offer.tier}</Text>
+                      </View>
+                    ) : (
+                      <View style={[styles.rarityBadge, { backgroundColor: rarityColor }]}>
+                        <Text style={styles.rarityText}>{offer.rarity.toUpperCase()}</Text>
+                      </View>
+                    )}
                     {offer.type === 'NumberUpgrade' && offer.digit && (
-                      <View style={[styles.iconBadge, { backgroundColor: rarityColor }]}>
+                      <View style={[styles.iconBadge, { backgroundColor: COLORS.primary.cyan }]}>
                         <PixelIcon number={offer.digit} size={20} color="#000000" />
+                      </View>
+                    )}
+                    {(offer.type === 'Consumable' || offer.type === 'RelicRun' || offer.type === 'RelicPermanent' || offer.type === 'RuleMutator') && (
+                      <View style={[styles.iconBadge, { backgroundColor: rarityColor }]}>
+                        <PixelIcon number={0} size={20} color="#000000" iconType={offer.type === 'Consumable' ? 'potion' : 'artifact'} />
                       </View>
                     )}
                   </View>
@@ -435,9 +446,15 @@ export default function ShopScreen() {
                   <Text style={styles.modalCloseText}>[ X ]</Text>
                 </TouchableOpacity>
 
-                <View style={[styles.modalRarityBadge, { backgroundColor: getRarityColor(selectedOffer.rarity) }]}>
-                  <Text style={styles.modalRarityText}>{selectedOffer.rarity.toUpperCase()}</Text>
-                </View>
+                {selectedOffer.type === 'NumberUpgrade' ? (
+                  <View style={[styles.modalLevelBadge, { backgroundColor: COLORS.primary.cyan }]}>
+                    <Text style={styles.modalLevelText}>LEVEL {selectedOffer.tier}</Text>
+                  </View>
+                ) : (
+                  <View style={[styles.modalRarityBadge, { backgroundColor: getRarityColor(selectedOffer.rarity) }]}>
+                    <Text style={styles.modalRarityText}>{selectedOffer.rarity.toUpperCase()}</Text>
+                  </View>
+                )}
 
                 <Text style={styles.modalTitle}>{selectedOffer.descriptionShort}</Text>
                 <Text style={styles.modalType}>{getOfferTypeLabel(selectedOffer)}</Text>
@@ -609,6 +626,20 @@ const styles = StyleSheet.create({
     fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
     letterSpacing: 1,
   },
+  levelBadge: {
+    alignSelf: 'flex-start' as const,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: BORDER.medium,
+    borderColor: COLORS.background.primary,
+  },
+  levelText: {
+    fontSize: 9,
+    fontWeight: 'bold' as const,
+    color: '#000000',
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    letterSpacing: 1,
+  },
   iconBadge: {
     width: 24,
     height: 24,
@@ -758,6 +789,21 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   modalRarityText: {
+    fontSize: 10,
+    fontWeight: 'bold' as const,
+    color: '#000000',
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    letterSpacing: 1,
+  },
+  modalLevelBadge: {
+    alignSelf: 'flex-start' as const,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: BORDER.medium,
+    borderColor: COLORS.background.primary,
+    marginBottom: 12,
+  },
+  modalLevelText: {
     fontSize: 10,
     fontWeight: 'bold' as const,
     color: '#000000',
