@@ -55,6 +55,22 @@ function filterByDependencies(offers: ShopOffer[], ownedIds: string[]): ShopOffe
   });
 }
 
+function filterNumberUpgradesByTier(offers: ShopOffer[], ownedIds: string[]): ShopOffer[] {
+  return offers.filter(offer => {
+    if (offer.type !== 'NumberUpgrade') return true;
+    
+    // Check if this exact upgrade is already owned
+    if (ownedIds.includes(offer.id)) return false;
+    
+    // For tier 1, always show if not owned
+    if (offer.tier === 1) return true;
+    
+    // For higher tiers, check if the previous tier is owned
+    const prevTierId = `num_${offer.digit}_t${offer.tier! - 1}`;
+    return ownedIds.includes(prevTierId);
+  });
+}
+
 function selectOfferByRarity(
   pool: ShopOffer[], 
   rng: SeededRandom, 
@@ -64,6 +80,7 @@ function selectOfferByRarity(
 ): ShopOffer | null {
   let availableOffers = pool.filter(o => !excludeIds.includes(o.id));
   availableOffers = filterByDependencies(availableOffers, ownedIds);
+  availableOffers = filterNumberUpgradesByTier(availableOffers, ownedIds);
   
   if (availableOffers.length === 0) return null;
   
