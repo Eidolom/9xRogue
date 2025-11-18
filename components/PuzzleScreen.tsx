@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, Platform, Easing } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/contexts/GameContext';
 import { Trash2, Sparkles, ShoppingBag, Eye, DollarSign, Laugh, Shield, Zap, Dices, Target, PowerIcon, Trophy, RotateCcw, Check, Edit3 } from 'lucide-react-native';
@@ -26,19 +26,6 @@ const NUMBER_ICONS = [
   Trophy,
 ] as const;
 
-const NUMBER_NAMES = [
-  '',
-  'Scout',
-  'Merchant',
-  'Jester',
-  'Fortress',
-  'Catalyst',
-  'Gambler',
-  'Sniper',
-  'Powerhouse',
-  'Finisher',
-] as const;
-
 export default function PuzzleScreen() {
   const insets = useSafeAreaInsets();
   const { gameState, selectCell, placeNumber, clearCell, toggleCandidate, completeFloor, clearPuzzle, solvePuzzle } = useGame();
@@ -46,13 +33,6 @@ export default function PuzzleScreen() {
   const [showInventory, setShowInventory] = useState(false);
   const [pencilMode, setPencilMode] = useState(false);
   
-  const glitchAnims = useRef<Map<string, {
-    translateX: Animated.Value;
-    translateY: Animated.Value;
-    opacity: Animated.Value;
-    scale: Animated.Value;
-  }>>(new Map()).current;
-
   const numberUpgradeLevels = useMemo(() => {
     const levels: Record<number, { level: number; color: string; rarity: string }> = {};
     for (let num = 1; num <= 9; num++) {
@@ -102,112 +82,6 @@ export default function PuzzleScreen() {
       }),
     ]).start();
   }, [gameState.corruption, corruptionAnim]);
-  
-
-
-  const getGlitchAnim = (row: number, col: number) => {
-    const key = `${row}-${col}`;
-    if (!glitchAnims.has(key)) {
-      const translateX = new Animated.Value(0);
-      const translateY = new Animated.Value(0);
-      const opacity = new Animated.Value(1);
-      const scale = new Animated.Value(1);
-      glitchAnims.set(key, { translateX, translateY, opacity, scale });
-    }
-    return glitchAnims.get(key)!;
-  };
-
-  const startGlitchAnimation = (row: number, col: number, intensity: number) => {
-    const anims = getGlitchAnim(row, col);
-    const glitchStrength = intensity * 4;
-    
-    const createGlitch = () => {
-      return Animated.parallel([
-        Animated.sequence([
-          Animated.timing(anims.translateX, {
-            toValue: (Math.random() - 0.5) * glitchStrength,
-            duration: 50,
-            useNativeDriver: true,
-            easing: Easing.step0,
-          }),
-          Animated.timing(anims.translateX, {
-            toValue: 0,
-            duration: 50,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(anims.translateY, {
-            toValue: (Math.random() - 0.5) * glitchStrength,
-            duration: 50,
-            useNativeDriver: true,
-            easing: Easing.step0,
-          }),
-          Animated.timing(anims.translateY, {
-            toValue: 0,
-            duration: 50,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(anims.opacity, {
-            toValue: 0.6 + Math.random() * 0.4,
-            duration: 50,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anims.opacity, {
-            toValue: 1,
-            duration: 50,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(anims.scale, {
-            toValue: 1 + (Math.random() * 0.05),
-            duration: 50,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anims.scale, {
-            toValue: 1,
-            duration: 50,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]);
-    };
-
-    Animated.loop(
-      Animated.sequence([
-        createGlitch(),
-        Animated.delay(Math.random() * 500 + 200),
-      ])
-    ).start();
-  };
-  
-  const glitchAnimsTracking = useRef<Set<string>>(new Set()).current;
-  
-  useEffect(() => {
-    const newTracking = new Set<string>();
-    
-    for (let row = 0; row < 9; row++) {
-      for (let col = 0; col < 9; col++) {
-        const cell = gameState.grid[row][col];
-        const corruption = cell.corruption / 3;
-        const isCorrupted = !cell.isFixed && corruption > 0;
-        const key = `${row}-${col}`;
-        
-        if (isCorrupted && corruption > 0.3) {
-          newTracking.add(key);
-          if (!glitchAnimsTracking.has(key)) {
-            startGlitchAnimation(row, col, corruption);
-          }
-        }
-      }
-    }
-    
-    glitchAnimsTracking.clear();
-    newTracking.forEach(key => glitchAnimsTracking.add(key));
-  }, [gameState.grid, glitchAnimsTracking]);
 
   const renderCell = (row: number, col: number) => {
     const cell = gameState.grid[row][col];
@@ -219,7 +93,7 @@ export default function PuzzleScreen() {
     const boxIndex = boxRow * 3 + boxCol;
     const isBoxLocked = gameState.lockedBoxes.includes(boxIndex);
     
-    const isCorrupted = !cell.isFixed && corruption > 0;
+    const isCorrupted = !cell.isFixed && corruption > 0.5;
 
     let backgroundColor = cell.isFixed ? 'rgba(93, 188, 210, 0.1)' : '#000000';
     if (!cell.isFixed && corruption > 0) {
@@ -237,13 +111,10 @@ export default function PuzzleScreen() {
 
     const isThickBorderRight = col % 3 === 2 && col !== 8;
     const isThickBorderBottom = row % 3 === 2 && row !== 8;
-    
-    const glitchAnim = isCorrupted && corruption > 0.3 ? getGlitchAnim(row, col) : null;
-    const shouldGlitch = isCorrupted && corruption > 0.3;
 
     const cellContent = (
       <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
-        {isCorrupted && corruption > 0.5 && (
+        {isCorrupted && (
           <View style={styles.glitchOverlay} />
         )}
         {cell.value !== null && !cell.isHidden ? (
@@ -259,7 +130,7 @@ export default function PuzzleScreen() {
             >
               {cell.value}
             </Text>
-            {isCorrupted && corruption > 0.6 && (
+            {isCorrupted && (
               <Text
                 style={[
                   styles.cellText,
@@ -278,7 +149,7 @@ export default function PuzzleScreen() {
                 {cell.candidates.includes(num) && (
                   <Text style={[
                     styles.candidateText,
-                    isCorrupted && corruption > 0.5 && styles.corruptedCandidateText,
+                    isCorrupted && styles.corruptedCandidateText,
                   ]}>{num}</Text>
                 )}
               </View>
@@ -311,28 +182,13 @@ export default function PuzzleScreen() {
             backgroundColor,
             opacity: cell.isHidden ? 0.3 : 1,
           },
-          isCorrupted && corruption > 0.5 && styles.heavilyCorruptedCell,
+          isCorrupted && styles.heavilyCorruptedCell,
         ]}
         onPress={() => selectCell(row, col)}
         activeOpacity={0.7}
         disabled={cell.isLocked || isBoxLocked}
       >
-        {shouldGlitch && glitchAnim ? (
-          <Animated.View
-            style={{
-              transform: [
-                { translateX: glitchAnim.translateX },
-                { translateY: glitchAnim.translateY },
-                { scale: glitchAnim.scale },
-              ],
-              opacity: glitchAnim.opacity,
-            }}
-          >
-            {cellContent}
-          </Animated.View>
-        ) : (
-          cellContent
-        )}
+        {cellContent}
       </TouchableOpacity>
     );
   };
