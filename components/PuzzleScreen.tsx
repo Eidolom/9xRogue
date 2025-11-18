@@ -106,28 +106,26 @@ export default function PuzzleScreen() {
     const boxIndex = boxRow * 3 + boxCol;
     const isBoxLocked = gameState.lockedBoxes.includes(boxIndex);
 
-    let backgroundColor = cell.isFixed ? 'rgba(192, 203, 220, 0.1)' : '#0d0e15';
+    let backgroundColor = cell.isFixed ? 'rgba(93, 188, 210, 0.1)' : '#000000';
     if (!cell.isFixed && corruption > 0) {
-      backgroundColor = `rgba(255, 0, 68, ${Math.min(corruption, 0.6)})`;
+      backgroundColor = `rgba(196, 76, 196, ${Math.min(corruption, 0.4)})`;
     }
     if (cell.isFogged && !cell.isFixed) {
-      backgroundColor = 'rgba(192, 203, 220, 0.15)';
+      backgroundColor = 'rgba(93, 188, 210, 0.15)';
     }
     if (cell.isLocked) {
-      backgroundColor = 'rgba(255, 204, 51, 0.2)';
+      backgroundColor = 'rgba(230, 176, 76, 0.2)';
     }
     if (isBoxLocked && !cell.isFixed) {
-      backgroundColor = 'rgba(255, 0, 68, 0.4)';
+      backgroundColor = 'rgba(230, 76, 76, 0.35)';
     }
 
     const isThickBorderRight = col % 3 === 2 && col !== 8;
     const isThickBorderBottom = row % 3 === 2 && row !== 8;
-    
-    const cellKey = `${row}-${col}`;
-    
+
     return (
       <TouchableOpacity
-        key={cellKey}
+        key={`${row}-${col}`}
         style={[
           styles.cell,
           isSelected && styles.selectedCell,
