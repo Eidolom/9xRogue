@@ -131,7 +131,7 @@ export function applyNumberUpgradeEffect(
             r.map((c, j) => {
               if (i === nRow && j === nCol) {
                 if (hasNumberUpgrade) {
-                  return { ...c, candidates: [value], isFogged: false };
+                  return { ...c, candidates: [value] };
                 } else {
                   return { ...c, isFogged: false };
                 }
@@ -164,7 +164,7 @@ export function applyNumberUpgradeEffect(
             r.map((c, j) => {
               if (i === nRow && j === nCol) {
                 if (hasNumberUpgrade) {
-                  return { ...c, candidates: [value], isFogged: false };
+                  return { ...c, candidates: [value] };
                 } else {
                   return { ...c, isFogged: false };
                 }
@@ -194,7 +194,7 @@ export function applyNumberUpgradeEffect(
             r.map((c, j) => {
               if (i === hRow && j === hCol) {
                 if (hasNumberUpgrade) {
-                  return { ...c, candidates: [value], isFogged: false };
+                  return { ...c, candidates: [value] };
                 } else {
                   return { ...c, isFogged: false };
                 }
@@ -423,7 +423,7 @@ export function applyNumberUpgradeEffect(
             r.map((c, j) => {
               if (i === hRow && j === hCol) {
                 if (hasNumberUpgrade) {
-                  return { ...c, candidates: [value], isFogged: false };
+                  return { ...c, candidates: [value] };
                 } else {
                   return { ...c, isFogged: false };
                 }
