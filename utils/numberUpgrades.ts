@@ -62,13 +62,7 @@ export function applyRogueUpgradesAtStart(
         break;
 
       case 'jester_master_flow':
-        const hiddenSingle = findRandomHiddenSingle(newGrid, solution);
-        if (hiddenSingle) {
-          const [row, col] = hiddenSingle;
-          newGrid[row][col].value = solution[row][col];
-          newGrid[row][col].isCorrect = true;
-          console.log('[Jester] Solved hidden single at start');
-        }
+        console.log('[Jester] Master of Flow - immune to all flow disruption');
         break;
 
       case 'fortress_absolution':
@@ -118,7 +112,8 @@ export function applyNumberUpgradeEffect(
   col: number,
   placedNumber: number,
   globalCorruption: number,
-  currency: number
+  currency: number,
+  allUpgrades?: Upgrade[]
 ): UpgradeEffectResult {
   if (upgrade.number !== placedNumber) {
     return { grid };
@@ -293,25 +288,27 @@ export function applyNumberUpgradeEffect(
       break;
     }
 
-    case 'jester_trio': {
-      const threesInRow = countNumberInRow(grid, row, 3);
-      result.currency = currency + threesInRow;
-      console.log(`[Jester L1] Trio: +${threesInRow} gold`);
-      break;
-    }
-
-    case 'jester_trio_plus': {
-      const threesInRow = countNumberInRow(grid, row, 3);
-      const threesInCol = countNumberInColumn(grid, col, 3);
-      const bonus = threesInRow + threesInCol;
-      result.currency = currency + bonus;
-      console.log(`[Jester L2] Trio+: +${bonus} gold`);
-      break;
-    }
-
     case 'jester_flow_state':
-      console.log('[Jester L3] Flow State - immune to input delays');
+      console.log('[Jester L1] Flow State - immune to candidate shuffling (passive)');
       break;
+
+    case 'jester_lockpick':
+      console.log('[Jester L2] Lockpick - helps break cell locks faster');
+      break;
+
+    case 'jester_rule_of_three': {
+      const numbersInRow = grid[row].filter(c => c.value !== null).length;
+      const numbersInCol = grid.filter(r => r[col].value !== null).length;
+      const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
+      const boxCells = getBoxCells(boxIndex);
+      const numbersInBox = boxCells.filter(([r, c]) => grid[r][c].value !== null).length;
+      
+      if (numbersInRow === 3 || numbersInCol === 3 || numbersInBox === 3) {
+        result.currency = currency + 3;
+        console.log('[Jester L3] Rule of Three! Placed 3rd - +3 gold');
+      }
+      break;
+    }
 
     case 'jester_unstoppable':
       result.grid = grid.map(r => r.map(c => ({
@@ -319,17 +316,29 @@ export function applyNumberUpgradeEffect(
         isLocked: false,
         lockTurnsRemaining: 0,
       })));
-      console.log('[Jester L4] Unstoppable - broke all cell locks');
+      console.log('[Jester L4] Unstoppable - instantly broke all cell locks');
       break;
 
-    case 'jester_full_house': {
-      const threesInRow = countNumberInRow(grid, row, 3);
-      const threesInCol = countNumberInColumn(grid, col, 3);
+    case 'jester_grand_triplet': {
+      const numbersInRow = grid[row].filter(c => c.value !== null).length;
+      const numbersInCol = grid.filter(r => r[col].value !== null).length;
       const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
-      const threesInBox = countNumberInBox(grid, boxIndex, 3);
-      const bonus = threesInRow + threesInCol + threesInBox;
-      result.currency = currency + bonus;
-      console.log(`[Jester L5] Full House: +${bonus} gold`);
+      const boxCells = getBoxCells(boxIndex);
+      const numbersInBox = boxCells.filter(([r, c]) => grid[r][c].value !== null).length;
+      
+      if (numbersInRow === 3 || numbersInCol === 3 || numbersInBox === 3) {
+        result.currency = currency + 6;
+        console.log('[Jester L5] Grand Triplet! Placed 3rd - +6 gold');
+      }
+      break;
+    }
+
+    case 'jester_master_flow': {
+      const hasMasterFlow = allUpgrades?.some(u => u.effect === 'jester_master_flow');
+      if (hasMasterFlow) {
+        result.currency = currency + 6;
+        console.log('[Jester ROGUE] Master of Flow - always triggers Grand Triplet +6 gold');
+      }
       break;
     }
 

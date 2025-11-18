@@ -457,7 +457,8 @@ export const [GameContext, useGame] = createContextHook(() => {
             col,
             num,
             newCorruption,
-            newCurrency
+            newCurrency,
+            gameState.upgrades
           );
           
           newGrid = result.grid;
