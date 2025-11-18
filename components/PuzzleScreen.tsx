@@ -6,6 +6,7 @@ import { Trash2, Sparkles, ShoppingBag, Eye, DollarSign, Laugh, Shield, Zap, Dic
 import CRTBackground from './CRTBackground';
 import InventoryScreen from './InventoryScreen';
 import { COLORS, BORDER } from '@/constants/theme';
+import { getFloorName } from '@/constants/floorNames';
 
 const { width } = Dimensions.get('window');
 const GRID_PADDING = 32;
@@ -363,6 +364,11 @@ export default function PuzzleScreen() {
 
       <View style={styles.gameArea}>
         <View style={styles.gridContainer}>
+          <View style={styles.floorNameContainer}>
+            <Text style={styles.floorNameText}>
+              FLOOR {gameState.floor}: {getFloorName(gameState.floor).toUpperCase()}
+            </Text>
+          </View>
           <View style={[styles.grid, { width: GRID_SIZE, height: GRID_SIZE }]}>
             {renderGrid()}
           </View>
@@ -753,5 +759,21 @@ const styles = StyleSheet.create({
   },
   numberButtonPencil: {
     backgroundColor: 'rgba(230, 176, 76, 0.1)',
+  },
+  floorNameContainer: {
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: COLORS.background.primary,
+    borderWidth: BORDER.medium,
+    borderColor: COLORS.primary.cyan,
+  },
+  floorNameText: {
+    fontSize: 13,
+    fontWeight: 'bold' as const,
+    color: COLORS.primary.cyan,
+    textAlign: 'center' as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
+    letterSpacing: 2,
   },
 });
