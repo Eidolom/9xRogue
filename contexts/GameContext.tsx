@@ -27,6 +27,8 @@ import {
 } from '@/utils/ambiguity';
 import {
   spreadCorruption,
+  spreadAmbientCorruption,
+  getFloorStartingCorruption,
   applyCorruptionDegradation,
   distortInputsInCorruptedZone,
   triggerCorruptionEvent,
@@ -374,6 +376,14 @@ export const [GameContext, useGame] = createContextHook(() => {
     
     const upgradeEffects = gameState.upgrades.map(u => u.effect);
     newGrid = applyCorruptionDegradation(newGrid, gameState.solution, upgradeEffects);
+    
+    const isCorrectPlacementForSlowBurn = gameState.solution[row][col] === num;
+    const previousCorruptionForSlowBurn = getTotalCorruption(newGrid);
+    
+    if (isCorrectPlacementForSlowBurn && previousCorruptionForSlowBurn > 0) {
+      newGrid = spreadAmbientCorruption(newGrid);
+      console.log('[SlowBurn] Correct move triggered ambient corruption spread');
+    }
     
     let newLockedBoxes = [...gameState.lockedBoxes];
     
@@ -759,6 +769,27 @@ export const [GameContext, useGame] = createContextHook(() => {
     const { puzzle, solution } = generatePuzzle(difficulty);
     const modifiers = getModifiersForFloor(newFloor);
     let { grid, zones } = createGameGrid(puzzle, solution, modifiers);
+    
+    const floorCorruption = getFloorStartingCorruption(newFloor);
+    if (floorCorruption > 0) {
+      const uncorruptedCells: [number, number][] = [];
+      for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+          if (grid[i][j].corruption === 0 && !grid[i][j].isFixed) {
+            uncorruptedCells.push([i, j]);
+          }
+        }
+      }
+      
+      for (let i = 0; i < Math.min(floorCorruption, uncorruptedCells.length); i++) {
+        const randomIndex = Math.floor(Math.random() * uncorruptedCells.length);
+        const [r, c] = uncorruptedCells[randomIndex];
+        grid[r][c].corruption = 1;
+        uncorruptedCells.splice(randomIndex, 1);
+      }
+      
+      console.log(`[FloorTax] Floor ${newFloor} starts with ${floorCorruption} corruption`);
+    }
 
     setFloorStartTime(Date.now());
     

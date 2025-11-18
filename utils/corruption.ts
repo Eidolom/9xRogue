@@ -72,6 +72,48 @@ export function spreadCorruption(
   };
 }
 
+export function spreadAmbientCorruption(
+  grid: GameGrid
+): GameGrid {
+  const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
+  
+  const corruptedCells: [number, number][] = [];
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      if (newGrid[i][j].corruption > 0) {
+        corruptedCells.push([i, j]);
+      }
+    }
+  }
+  
+  if (corruptedCells.length === 0) {
+    return newGrid;
+  }
+  
+  const sourceCell = corruptedCells[Math.floor(Math.random() * corruptedCells.length)];
+  const [sourceRow, sourceCol] = sourceCell;
+  
+  const connectedCells = getConnectedCells(sourceRow, sourceCol);
+  const uncorruptedCells = connectedCells.filter(
+    ([r, c]) => newGrid[r][c].corruption === 0
+  );
+  
+  if (uncorruptedCells.length > 0) {
+    const randomIndex = Math.floor(Math.random() * uncorruptedCells.length);
+    const [targetRow, targetCol] = uncorruptedCells[randomIndex];
+    newGrid[targetRow][targetCol].corruption = 1;
+    console.log(`[SlowBurn] Corruption spread from (${sourceRow},${sourceCol}) to (${targetRow},${targetCol})`);
+  }
+  
+  return newGrid;
+}
+
+export function getFloorStartingCorruption(floor: number): number {
+  if (floor <= 3) return 0;
+  if (floor <= 6) return 5;
+  return 10;
+}
+
 export function getConnectedCells(row: number, col: number): [number, number][] {
   const connected: [number, number][] = [];
   

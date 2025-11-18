@@ -346,6 +346,17 @@ export default function PuzzleScreen() {
           <Text style={styles.statLabel}>CRP: {gameState.corruption}/50</Text>
           <View style={styles.barContainer}>
             <View style={[styles.barFill, { width: `${corruptionBar * 100}%`, backgroundColor: COLORS.accent.magenta }]} />
+            <View style={styles.thresholdMarker10} />
+            <View style={styles.thresholdMarker20} />
+            <View style={styles.thresholdMarker30} />
+            <View style={styles.thresholdMarker40} />
+          </View>
+          <View style={styles.thresholdLabels}>
+            <Text style={styles.thresholdLabel}>10</Text>
+            <Text style={styles.thresholdLabel}>20</Text>
+            <Text style={styles.thresholdLabel}>30</Text>
+            <Text style={styles.thresholdLabel}>40</Text>
+            <Text style={styles.thresholdLabel}>50</Text>
           </View>
         </Animated.View>
       </View>
@@ -447,9 +458,58 @@ const styles = StyleSheet.create({
     height: 6,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     overflow: 'hidden' as const,
+    position: 'relative' as const,
   },
   barFill: {
     height: '100%',
+  },
+  thresholdMarker10: {
+    position: 'absolute' as const,
+    left: '20%',
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: COLORS.accent.amber,
+    opacity: 0.6,
+  },
+  thresholdMarker20: {
+    position: 'absolute' as const,
+    left: '40%',
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: COLORS.accent.red,
+    opacity: 0.6,
+  },
+  thresholdMarker30: {
+    position: 'absolute' as const,
+    left: '60%',
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: COLORS.accent.amber,
+    opacity: 0.6,
+  },
+  thresholdMarker40: {
+    position: 'absolute' as const,
+    left: '80%',
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: COLORS.accent.red,
+    opacity: 0.6,
+  },
+  thresholdLabels: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    marginTop: 2,
+  },
+  thresholdLabel: {
+    fontSize: 7,
+    color: COLORS.text.secondary,
+    fontWeight: 'bold' as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
+    opacity: 0.5,
   },
   corruptionContainer: {
     backgroundColor: COLORS.background.primary,
