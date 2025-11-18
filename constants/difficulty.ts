@@ -12,33 +12,19 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
     floor: 1,
     description: 'Naked Singles - Simple scanning',
     baseDifficulty: 35,
-    modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 3,
-      },
-    ],
+    modifiers: [],
   },
   {
     floor: 2,
     description: 'Hidden Singles - Basic deduction',
     baseDifficulty: 38,
-    modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 3,
-      },
-    ],
+    modifiers: [],
   },
   {
     floor: 3,
     description: 'Pointing Pairs - Box reduction',
     baseDifficulty: 42,
     modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 4,
-      },
       {
         type: 'ambiguity_injection',
         intensity: 1,
@@ -52,10 +38,6 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
     description: 'Naked/Hidden Pairs - Pattern recognition',
     baseDifficulty: 46,
     modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 4,
-      },
       {
         type: 'fog',
         intensity: 0.3,
@@ -74,10 +56,6 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
     description: 'Naked Triples - Complex patterns',
     baseDifficulty: 50,
     modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 5,
-      },
       {
         type: 'fog',
         intensity: 0.4,
@@ -100,10 +78,6 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
     description: 'X-Wing - Advanced technique',
     baseDifficulty: 54,
     modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 5,
-      },
       {
         type: 'fog',
         intensity: 0.5,
@@ -130,10 +104,6 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
     description: 'XY-Wing - Three-cell hinge',
     baseDifficulty: 56,
     modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 5,
-      },
       {
         type: 'fog',
         intensity: 0.6,
@@ -166,10 +136,6 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
     description: 'Swordfish - 3x3 grid pattern',
     baseDifficulty: 58,
     modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 5,
-      },
       {
         type: 'fog',
         intensity: 0.7,
@@ -206,10 +172,6 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
     description: 'Mixed Advanced + Ambiguity',
     baseDifficulty: 60,
     modifiers: [
-      {
-        type: 'delayed_validation',
-        intensity: 5,
-      },
       {
         type: 'fog',
         intensity: 0.8,
@@ -260,7 +222,6 @@ export function getModifiersForFloor(floor: number): LevelModifier[] {
   }
 
   const allModifierTypes: LevelModifier[] = [
-    { type: 'delayed_validation', intensity: 5 },
     { type: 'fog', intensity: Math.random() * 0.5 + 0.5, regions: getRandomRegions(3, 6) },
     { type: 'cell_lockout', intensity: Math.floor(Math.random() * 3) + 3 },
     { type: 'candidate_shuffle', intensity: 1, regions: getRandomRegions(2, 4), duration: Math.random() * 1000 + 2000 },

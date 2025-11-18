@@ -10,13 +10,11 @@ import { generatePuzzle, checkPuzzleComplete, countFilledCells } from '@/utils/s
 import { getModifiersForFloor, getDifficultyForFloor, getDescriptionForFloor } from '@/constants/difficulty';
 import { 
   initializeCell, 
-  processDelayedValidation, 
   applyFogModifier, 
   applyProbabilisticHints,
   applyCandidateSuppression,
   applyRecentHide,
   applyCellLockout,
-  shouldSuppressValidation,
 } from '@/utils/modifiers';
 import {
   generateAmbiguityZones,
@@ -220,8 +218,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       modifiers,
       moveHistory: [],
       turnNumber: 0,
-      pendingValidations: [],
-      delayedValidationMoves: 3,
       timedHideActive: false,
       timedHideRegion: null,
       shuffleTimestamp: Date.now(),
@@ -274,10 +270,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
-    const delayedMod = gameState.modifiers.find(m => m.type === 'delayed_validation');
-    const delayedMoves = delayedMod ? delayedMod.intensity : 0;
-    const suppressValidation = shouldSuppressValidation(row, col, gameState.modifiers);
-
     const move: MoveHistory = {
       row,
       col,
@@ -291,13 +283,15 @@ export const [GameContext, useGame] = createContextHook(() => {
     const corruptionDistortion = distortInputsInCorruptedZone(gameState.grid, row, col, num);
     const finalLockDuration = corruptionDistortion.shouldLock ? Math.max(lockDuration, 3) : lockDuration;
 
+    const isCorrect = gameState.solution[row][col] === num;
+    
     let newGrid = gameState.grid.map((r, i) => 
       r.map((c, j) => {
         if (i === row && j === col) {
           return {
             ...c,
             value: num,
-            isCorrect: suppressValidation ? true : c.isCorrect,
+            isCorrect,
             lockTurnsRemaining: finalLockDuration,
             isLocked: finalLockDuration > 0,
             isHidden: corruptionDistortion.shouldHide ? true : c.isHidden,
@@ -314,19 +308,13 @@ export const [GameContext, useGame] = createContextHook(() => {
 
     newGrid = applyCellLockout(newGrid, lockDuration);
 
-    let newPendingValidations = [...gameState.pendingValidations, move];
     let newMistakes = gameState.mistakes;
     let newCurrency = gameState.currency;
     let upgradeTriggered = false;
     let newAmbiguityZones = gameState.ambiguityZones;
     let newUpgrades = gameState.upgrades.map(u => ({ ...u }));
-
-    if (newPendingValidations.length >= delayedMoves) {
-      const toValidate = newPendingValidations.splice(0, newPendingValidations.length - delayedMoves + 1);
-      const validationResult = processDelayedValidation(newGrid, gameState.solution, toValidate);
-      newGrid = validationResult.grid;
-      
-      let mistakesToAdd = validationResult.mistakes;
+    
+    let mistakesToAdd = isCorrect ? 0 : 1;
       
       if (mistakesToAdd > 0 && gameState.shieldCharges > 0) {
         const shieldsToConsume = Math.min(mistakesToAdd, gameState.shieldCharges);
@@ -384,30 +372,24 @@ export const [GameContext, useGame] = createContextHook(() => {
         }
       }
       
-      newMistakes += mistakesToAdd;
+    newMistakes += mistakesToAdd;
+    
+    if (mistakesToAdd > 0) {
+      setRunMistakes(prev => prev + 1);
       
-      if (validationResult.mistakes > 0) {
-        setRunMistakes(prev => prev + validationResult.mistakes);
+      const noSpread = gameState.upgrades.find(u => u.effect === 'no_spread');
+      const hazmatSuit = gameState.upgrades.find(u => u.effect === 'first_mistake_safe');
+      const isFirstMistakeInPuzzle = gameState.mistakes === 0 && hazmatSuit;
+      
+      if (!noSpread && !isFirstMistakeInPuzzle) {
+        const previousCorruption = getTotalCorruption(newGrid);
+        const spreadResult = spreadCorruption(newGrid, row, col);
+        newGrid = spreadResult.grid;
         
-        const noSpread = gameState.upgrades.find(u => u.effect === 'no_spread');
-        const hazmatSuit = gameState.upgrades.find(u => u.effect === 'first_mistake_safe');
-        const isFirstMistakeInPuzzle = gameState.mistakes === 0 && hazmatSuit;
-        
-        if (!noSpread && !isFirstMistakeInPuzzle) {
-          for (const validatedMove of toValidate) {
-            const isCorrect = gameState.solution[validatedMove.row][validatedMove.col] === validatedMove.value;
-            if (!isCorrect) {
-              const previousCorruption = getTotalCorruption(newGrid);
-              const spreadResult = spreadCorruption(newGrid, validatedMove.row, validatedMove.col);
-              newGrid = spreadResult.grid;
-              
-              const currentCorruption = getTotalCorruption(newGrid);
-              console.log(`[Corruption] Spread from (${validatedMove.row},${validatedMove.col}). Count: ${previousCorruption} -> ${currentCorruption}`);
-            }
-          }
-        } else if (isFirstMistakeInPuzzle) {
-          console.log('[HazmatSuit] First mistake - no corruption spread');
-        }
+        const currentCorruption = getTotalCorruption(newGrid);
+        console.log(`[Corruption] Spread from (${row},${col}). Count: ${previousCorruption} -> ${currentCorruption}`);
+      } else if (isFirstMistakeInPuzzle) {
+        console.log('[HazmatSuit] First mistake - no corruption spread');
       }
     }
     
@@ -475,7 +457,7 @@ export const [GameContext, useGame] = createContextHook(() => {
     }
     
     const currentCell = newGrid[row][col];
-    if (currentCell.isAmbiguous && !suppressValidation) {
+    if (currentCell.isAmbiguous) {
       const isCorrect = gameState.solution[row][col] === num;
       
       if (!isCorrect) {
@@ -568,11 +550,6 @@ export const [GameContext, useGame] = createContextHook(() => {
     const gameOver = newMistakes >= gameState.maxMistakes;
 
     if (isComplete) {
-      const validationResult = processDelayedValidation(newGrid, gameState.solution, newPendingValidations);
-      newGrid = validationResult.grid;
-      newMistakes += validationResult.mistakes;
-      newPendingValidations = [];
-      
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
@@ -595,7 +572,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       gameOver,
       moveHistory: [...prev.moveHistory, move],
       turnNumber: prev.turnNumber + 1,
-      pendingValidations: newPendingValidations,
       ambiguityZones: newAmbiguityZones,
       lockedBoxes: newLockedBoxes,
       shieldCharges: newShieldCharges,
@@ -885,7 +861,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       modifiers,
       moveHistory: [],
       turnNumber: 0,
-      pendingValidations: [],
       timedHideActive: false,
       timedHideRegion: null,
       shuffleTimestamp: Date.now(),
@@ -949,8 +924,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       modifiers,
       moveHistory: [],
       turnNumber: 0,
-      pendingValidations: [],
-      delayedValidationMoves: 3,
       timedHideActive: false,
       timedHideRegion: null,
       shuffleTimestamp: Date.now(),
@@ -1189,7 +1162,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       gameOver: false,
       moveHistory: [],
       turnNumber: 0,
-      pendingValidations: [],
     }));
 
     if (Platform.OS !== 'web') {
@@ -1223,7 +1195,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       completedCells: newCompletedCells,
       isComplete,
       gameOver: false,
-      pendingValidations: [],
     }));
 
     if (Platform.OS !== 'web') {

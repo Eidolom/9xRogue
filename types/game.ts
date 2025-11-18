@@ -35,7 +35,6 @@ export interface Upgrade {
 export type AmbiguityLevel = 'none' | 'A1' | 'A2' | 'A3' | 'A4';
 
 export type ModifierType = 
-  | 'delayed_validation'
   | 'fog'
   | 'probabilistic_hints'
   | 'forced_bifurcation'
@@ -83,8 +82,6 @@ export interface GameState {
   modifiers: LevelModifier[];
   moveHistory: MoveHistory[];
   turnNumber: number;
-  pendingValidations: MoveHistory[];
-  delayedValidationMoves: number;
   timedHideActive: boolean;
   timedHideRegion: number | null;
   shuffleTimestamp: number;

@@ -327,12 +327,6 @@ export default function PuzzleScreen() {
           </View>
         </View>
 
-        <View style={styles.pendingBadge}>
-          <Text style={styles.pendingText}>
-            ░ PENDING {gameState.pendingValidations.length === 0 ? '0' : gameState.pendingValidations.length}
-          </Text>
-        </View>
-
         <Animated.View
           style={[
             styles.corruptionContainer,

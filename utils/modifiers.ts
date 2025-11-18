@@ -155,40 +155,6 @@ export function applyCellLockout(
   );
 }
 
-export function processDelayedValidation(
-  grid: GameGrid,
-  solution: Grid,
-  pendingValidations: MoveHistory[]
-): { grid: GameGrid; mistakes: number; corruption: number } {
-  let newGrid = grid;
-  let mistakes = 0;
-  let corruption = 0;
-  
-  for (const move of pendingValidations) {
-    const isCorrect = solution[move.row][move.col] === move.value;
-    
-    if (!isCorrect) {
-      mistakes++;
-      corruption += 10;
-    }
-    
-    newGrid = newGrid.map((row, i) => 
-      row.map((cell, j) => {
-        if (i === move.row && j === move.col) {
-          return {
-            ...cell,
-            isCorrect,
-            corruption: isCorrect ? cell.corruption : cell.corruption + 1,
-          };
-        }
-        return cell;
-      })
-    );
-  }
-  
-  return { grid: newGrid, mistakes, corruption };
-}
-
 export function applyInvertedSignals(
   grid: GameGrid,
   modifier: LevelModifier
@@ -207,21 +173,6 @@ export function applyInvertedSignals(
       return cell;
     })
   );
-}
-
-export function shouldSuppressValidation(
-  row: number,
-  col: number,
-  modifiers: LevelModifier[]
-): boolean {
-  const region = getCellRegion(row, col);
-  const suppressionModifier = modifiers.find(m => m.type === 'constraint_suppression');
-  
-  if (suppressionModifier && suppressionModifier.regions) {
-    return suppressionModifier.regions.includes(region);
-  }
-  
-  return false;
 }
 
 export function initializeCell(value: number | null, isFixed: boolean): Cell {
