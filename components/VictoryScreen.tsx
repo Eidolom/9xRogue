@@ -111,14 +111,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.accent.amber,
     marginBottom: 8,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 4,
   },
   subtitle: {
     fontSize: 12,
     color: COLORS.text.secondary,
     marginBottom: 32,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 2,
   },
   statsCard: {
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     color: COLORS.primary.cyan,
     marginBottom: 20,
     textAlign: 'center' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 2,
   },
   statRow: {
@@ -150,14 +150,14 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 9,
     color: COLORS.text.secondary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 1,
   },
   statValue: {
     fontSize: 24,
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   upgradeIcon: {
     fontSize: 24,
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.primary.cyan,
     marginBottom: 16,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 2,
   },
   upgradeItem: {
@@ -190,12 +190,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
     marginBottom: 4,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   upgradeDesc: {
     fontSize: 12,
     color: COLORS.text.secondary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   playButton: {
     width: '100%',
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold' as const,
     color: '#000000',
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 3,
   },
 });
