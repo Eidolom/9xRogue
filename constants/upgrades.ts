@@ -65,7 +65,7 @@ export const UPGRADE_POOL: Upgrade[] = [
   {
     id: 'num_2_l1',
     name: '2 — The Merchant [L1]',
-    description: 'Grants +1 Gold',
+    description: 'Investment: Grants +1 Coin',
     type: 'number',
     number: 2,
     effect: 'merchant_gold_1',
@@ -75,7 +75,7 @@ export const UPGRADE_POOL: Upgrade[] = [
   {
     id: 'num_2_l2',
     name: '2 — The Merchant [L2]',
-    description: 'Grants +2 Gold',
+    description: 'Compound Interest: Grants +2 Coins',
     type: 'number',
     number: 2,
     effect: 'merchant_gold_2',
@@ -85,7 +85,7 @@ export const UPGRADE_POOL: Upgrade[] = [
   {
     id: 'num_2_l3',
     name: '2 — The Merchant [L3]',
-    description: 'Price Check: Reduces next shop\'s Corruption Inflation by 2% (stacks)',
+    description: 'Price Check: Grants +2 Coins and reduces next shop\'s Corruption Inflation by 2% (stacks)',
     type: 'number',
     number: 2,
     effect: 'merchant_price_check',
@@ -95,7 +95,7 @@ export const UPGRADE_POOL: Upgrade[] = [
   {
     id: 'num_2_l4',
     name: '2 — The Merchant [L4]',
-    description: 'Grants +3 Gold',
+    description: 'Liquid Assets: Grants +3 Coins',
     type: 'number',
     number: 2,
     effect: 'merchant_gold_3',
@@ -105,7 +105,7 @@ export const UPGRADE_POOL: Upgrade[] = [
   {
     id: 'num_2_l5',
     name: '2 — The Merchant [L5]',
-    description: 'Market Crash: Last \'2\' placed resets Corruption Inflation to 0% + grants 20 Gold',
+    description: 'Market Crash: Last \'2\' placed resets Corruption Inflation to 0% and grants +20 Coins',
     type: 'number',
     number: 2,
     effect: 'merchant_market_crash',
@@ -115,7 +115,7 @@ export const UPGRADE_POOL: Upgrade[] = [
   {
     id: 'num_2_rogue',
     name: '2 — The Merchant [ROGUE]',
-    description: 'Monopoly: Immune to all Corruption Inflation',
+    description: 'Monopoly: Permanently immune to all Corruption Inflation. All shop prices are always at base cost',
     type: 'number',
     number: 2,
     effect: 'merchant_monopoly',

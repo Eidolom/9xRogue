@@ -73,7 +73,7 @@ export interface GameState {
   mistakes: number;
   maxMistakes: number;
   corruption: number;
-  currency: number;
+  coins: number;
   entropyDust: number;
   upgrades: Upgrade[];
   isComplete: boolean;

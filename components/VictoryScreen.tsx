@@ -41,8 +41,8 @@ export default function VictoryScreen() {
 
             <View style={styles.statItem}>
               <Sparkles size={24} color={COLORS.accent.amber} />
-              <Text style={styles.statLabel}>CURRENCY</Text>
-              <Text style={styles.statValue}>{gameState.currency}</Text>
+              <Text style={styles.statLabel}>COINS</Text>
+              <Text style={styles.statValue}>{gameState.coins}</Text>
             </View>
           </View>
 
