@@ -154,18 +154,7 @@ export default function ShopScreen() {
 
     let upgrade: Upgrade;
     
-    if (offer.type === 'NumberUpgrade') {
-      upgrade = {
-        id: offer.id,
-        name: offer.descriptionShort,
-        description: offer.descriptionFull,
-        type: 'number',
-        number: (offer as any).digit,
-        effect: offer.effect,
-        cost: totalOF,
-        rarity: 'common',
-      };
-    } else if (offer.type === 'Consumable') {
+    if (offer.type === 'Consumable') {
       upgrade = {
         id: offer.id,
         name: offer.descriptionShort,
@@ -243,9 +232,6 @@ export default function ShopScreen() {
   };
 
   const getOfferTypeLabel = (offer: ShopOffer): string => {
-    if (offer.type === 'NumberUpgrade') {
-      return `NUM ${offer.digit}`;
-    }
     if (offer.type === 'RelicPermanent') {
       return 'ARTIFACT • PERMANENT';
     }
@@ -333,8 +319,8 @@ export default function ShopScreen() {
                   style={[
                     styles.card,
                     {
-                      borderColor: offer.type === 'NumberUpgrade' ? COLORS.primary.cyan : rarityColor,
-                      backgroundColor: offer.type === 'NumberUpgrade' ? 'rgba(93, 188, 210, 0.08)' : rarityBg,
+                      borderColor: rarityColor,
+                      backgroundColor: rarityBg,
                       opacity: isPurchased ? 0.4 : 1,
                     },
                   ]}
@@ -345,18 +331,9 @@ export default function ShopScreen() {
                   {isCorrupted && <View style={styles.corruptedOverlay} />}
 
                   <View style={styles.cardHeader}>
-                    {offer.type === 'NumberUpgrade' ? (
-                      <View style={[styles.levelBadge, { backgroundColor: COLORS.primary.cyan }]}>
-                        <Text style={styles.levelText}>LVL {offer.tier}</Text>
-                      </View>
-                    ) : offer.rarity ? (
+                    {offer.rarity && (
                       <View style={[styles.rarityBadge, { backgroundColor: rarityColor }]}>
                         <Text style={styles.rarityText}>{offer.rarity.toUpperCase()}</Text>
-                      </View>
-                    ) : null}
-                    {offer.type === 'NumberUpgrade' && offer.digit && (
-                      <View style={[styles.iconBadge, { backgroundColor: COLORS.primary.cyan }]}>
-                        <PixelIcon number={offer.digit} size={20} color="#000000" />
                       </View>
                     )}
                     {(offer.type === 'Consumable' || offer.type === 'RelicRun' || offer.type === 'RelicPermanent' || offer.type === 'RuleMutator') && (
@@ -448,15 +425,11 @@ export default function ShopScreen() {
                   <Text style={styles.modalCloseText}>[ X ]</Text>
                 </TouchableOpacity>
 
-                {selectedOffer.type === 'NumberUpgrade' ? (
-                  <View style={[styles.modalLevelBadge, { backgroundColor: COLORS.primary.cyan }]}>
-                    <Text style={styles.modalLevelText}>LEVEL {selectedOffer.tier}</Text>
-                  </View>
-                ) : selectedOffer.rarity ? (
+                {selectedOffer.rarity && (
                   <View style={[styles.modalRarityBadge, { backgroundColor: getRarityColor(selectedOffer.rarity) }]}>
                     <Text style={styles.modalRarityText}>{selectedOffer.rarity.toUpperCase()}</Text>
                   </View>
-                ) : null}
+                )}
 
                 <Text style={styles.modalTitle}>{selectedOffer.descriptionShort}</Text>
                 <Text style={styles.modalType}>{getOfferTypeLabel(selectedOffer)}</Text>
