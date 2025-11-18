@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, Platform, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/contexts/GameContext';
-import { Trash2, Sparkles, ShoppingBag, Eye, DollarSign, Laugh, Shield, Zap, Dices, Target, PowerIcon, Trophy, RotateCcw, Check, Edit3 } from 'lucide-react-native';
+import { Trash2, Sparkles, ShoppingBag, Eye, DollarSign, Laugh, Shield, Zap, Dices, Target, PowerIcon, Trophy, RotateCcw, Check, Edit3, BookOpen } from 'lucide-react-native';
 import CRTBackground from './CRTBackground';
 import InventoryScreen from './InventoryScreen';
+import GrimoireScreen from './GrimoireScreen';
 import { COLORS, BORDER } from '@/constants/theme';
 import { getFloorName } from '@/constants/floorNames';
 
@@ -44,6 +45,7 @@ export default function PuzzleScreen() {
   const { gameState, selectCell, placeNumber, clearCell, toggleCandidate, completeFloor, clearPuzzle, solvePuzzle } = useGame();
   const corruptionAnim = useRef(new Animated.Value(0)).current;
   const [showInventory, setShowInventory] = useState(false);
+  const [showGrimoire, setShowGrimoire] = useState(false);
   const [pencilMode, setPencilMode] = useState(false);
   
   const glitchAnims = useRef<Map<string, {
@@ -438,6 +440,14 @@ export default function PuzzleScreen() {
             </TouchableOpacity>
             
             <TouchableOpacity
+              style={styles.grimoireButton}
+              onPress={() => setShowGrimoire(true)}
+              activeOpacity={0.7}
+            >
+              <BookOpen size={18} color={COLORS.primary.cyan} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
               style={styles.clearPuzzleButton}
               onPress={clearPuzzle}
               activeOpacity={0.7}
@@ -547,6 +557,11 @@ export default function PuzzleScreen() {
       <InventoryScreen 
         visible={showInventory} 
         onClose={() => setShowInventory(false)} 
+      />
+      
+      <GrimoireScreen 
+        visible={showGrimoire} 
+        onClose={() => setShowGrimoire(false)} 
       />
     </View>
   );
@@ -809,6 +824,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: '#000000',
     fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
+  },
+  grimoireButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.background.primary,
+    borderWidth: BORDER.thick,
+    borderColor: COLORS.primary.cyan,
   },
   clearPuzzleButton: {
     width: 44,

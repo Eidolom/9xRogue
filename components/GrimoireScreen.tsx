@@ -82,7 +82,12 @@ const NUMBER_UPGRADES_CATALOG: Record<number, NumberUpgradeLevel[]> = {
   ],
 };
 
-export default function GrimoireScreen() {
+interface GrimoireScreenProps {
+  visible?: boolean;
+  onClose?: () => void;
+}
+
+export default function GrimoireScreen({ visible = true, onClose }: GrimoireScreenProps = {}) {
   const insets = useSafeAreaInsets();
   const { gameState, purchaseUpgrade, nextFloor } = useGame();
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
@@ -137,11 +142,25 @@ export default function GrimoireScreen() {
   };
 
   const handleContinue = () => {
-    nextFloor();
+    if (onClose) {
+      onClose();
+    } else {
+      nextFloor();
+    }
   };
 
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <View style={styles.container}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={styles.container}>
       <CRTBackground />
 
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
@@ -321,7 +340,8 @@ export default function GrimoireScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
-    </View>
+      </View>
+    </Modal>
   );
 }
 
