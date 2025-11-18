@@ -1,17 +1,19 @@
-import { GameGrid, Cell, Grid } from '@/types/game';
+import { GameGrid, Grid } from '@/types/game';
 
 export interface CorruptionSpreadResult {
   grid: GameGrid;
   corruptionAdded: number;
   eventTriggered: boolean;
   eventType?: CorruptionEventType;
+  lockedBox?: number;
 }
 
 export type CorruptionEventType = 
   | 'cascade_fog'
   | 'candidate_chaos'
   | 'region_inversion'
-  | 'phantom_lock';
+  | 'phantom_lock'
+  | 'cell_lock';
 
 export function getCorruptionThreshold(floor: number): number {
   return Math.min(20 + (floor * 5), 50);
@@ -138,14 +140,16 @@ function calculateCandidates(grid: GameGrid, solution: Grid, row: number, col: n
   const used = new Set<number>();
   
   for (let c = 0; c < 9; c++) {
-    if (grid[row][c].value !== null) {
-      used.add(grid[row][c].value);
+    const val = grid[row][c].value;
+    if (val !== null) {
+      used.add(val);
     }
   }
   
   for (let r = 0; r < 9; r++) {
-    if (grid[r][col].value !== null) {
-      used.add(grid[r][col].value);
+    const val = grid[r][col].value;
+    if (val !== null) {
+      used.add(val);
     }
   }
   
@@ -153,8 +157,9 @@ function calculateCandidates(grid: GameGrid, solution: Grid, row: number, col: n
   const boxCol = Math.floor(col / 3) * 3;
   for (let r = boxRow; r < boxRow + 3; r++) {
     for (let c = boxCol; c < boxCol + 3; c++) {
-      if (grid[r][c].value !== null) {
-        used.add(grid[r][c].value);
+      const val = grid[r][c].value;
+      if (val !== null) {
+        used.add(val);
       }
     }
   }
@@ -193,9 +198,13 @@ export function distortInputsInCorruptedZone(
 export function triggerCorruptionEvent(
   grid: GameGrid,
   totalCorruption: number,
-  threshold: number
-): { grid: GameGrid; eventType: CorruptionEventType | null } {
-  if (totalCorruption < threshold) {
+  threshold: number,
+  mistakeRow?: number,
+  mistakeCol?: number
+): { grid: GameGrid; eventType: CorruptionEventType | null; lockedBox?: number } {
+  const corruptionPercent = totalCorruption / threshold;
+  
+  if (Math.random() > corruptionPercent) {
     return { grid, eventType: null };
   }
   
@@ -203,61 +212,95 @@ export function triggerCorruptionEvent(
     'cascade_fog',
     'candidate_chaos',
     'region_inversion',
-    'phantom_lock'
+    'phantom_lock',
+    'cell_lock',
   ];
   
   const eventType = events[Math.floor(Math.random() * events.length)];
-  const newGrid = applyCorruptionEvent(grid, eventType);
+  const result = applyCorruptionEvent(grid, eventType, mistakeRow, mistakeCol);
   
-  return { grid: newGrid, eventType };
+  return { grid: result.grid, eventType, lockedBox: result.lockedBox };
 }
 
-function applyCorruptionEvent(grid: GameGrid, eventType: CorruptionEventType): GameGrid {
+function applyCorruptionEvent(
+  grid: GameGrid,
+  eventType: CorruptionEventType,
+  mistakeRow?: number,
+  mistakeCol?: number
+): { grid: GameGrid; lockedBox?: number } {
   switch (eventType) {
     case 'cascade_fog':
-      return grid.map(row => 
-        row.map(cell => ({
-          ...cell,
-          isFogged: cell.corruption > 0 ? true : cell.isFogged
-        }))
-      );
+      return {
+        grid: grid.map(row => 
+          row.map(cell => ({
+            ...cell,
+            isFogged: cell.corruption > 0 ? true : cell.isFogged
+          }))
+        ),
+      };
       
     case 'candidate_chaos':
-      return grid.map(row => 
-        row.map(cell => ({
-          ...cell,
-          candidates: cell.corruption > 0 && cell.candidates.length > 0
-            ? shuffleCandidates(cell.candidates)
-            : cell.candidates
-        }))
-      );
+      return {
+        grid: grid.map(row => 
+          row.map(cell => ({
+            ...cell,
+            candidates: cell.corruption > 0 && cell.candidates.length > 0
+              ? shuffleCandidates(cell.candidates)
+              : cell.candidates
+          }))
+        ),
+      };
       
-    case 'region_inversion':
+    case 'region_inversion': {
       const targetRegion = Math.floor(Math.random() * 9);
       const regionRow = Math.floor(targetRegion / 3) * 3;
       const regionCol = (targetRegion % 3) * 3;
       
-      return grid.map((row, i) => 
-        row.map((cell, j) => {
-          const inRegion = i >= regionRow && i < regionRow + 3 && 
-                          j >= regionCol && j < regionCol + 3;
-          return inRegion && cell.corruption > 0
-            ? { ...cell, isHidden: !cell.isHidden }
-            : cell;
-        })
-      );
+      return {
+        grid: grid.map((row, i) => 
+          row.map((cell, j) => {
+            const inRegion = i >= regionRow && i < regionRow + 3 && 
+                            j >= regionCol && j < regionCol + 3;
+            return inRegion && cell.corruption > 0
+              ? { ...cell, isHidden: !cell.isHidden }
+              : cell;
+          })
+        ),
+      };
+    }
       
     case 'phantom_lock':
-      return grid.map(row => 
-        row.map(cell => ({
-          ...cell,
-          isLocked: cell.corruption >= 2 && Math.random() < 0.3 ? true : cell.isLocked,
-          lockTurnsRemaining: cell.corruption >= 2 && Math.random() < 0.3 ? 3 : cell.lockTurnsRemaining
-        }))
-      );
+      return {
+        grid: grid.map(row => 
+          row.map(cell => ({
+            ...cell,
+            isLocked: cell.corruption >= 2 && Math.random() < 0.3 ? true : cell.isLocked,
+            lockTurnsRemaining: cell.corruption >= 2 && Math.random() < 0.3 ? 3 : cell.lockTurnsRemaining
+          }))
+        ),
+      };
+      
+    case 'cell_lock': {
+      let boxToLock: number;
+      
+      if (mistakeRow !== undefined && mistakeCol !== undefined) {
+        const boxRow = Math.floor(mistakeRow / 3);
+        const boxCol = Math.floor(mistakeCol / 3);
+        boxToLock = boxRow * 3 + boxCol;
+      } else {
+        boxToLock = Math.floor(Math.random() * 9);
+      }
+      
+      console.log(`[CellLock] Box ${boxToLock} locked by corruption event`);
+      
+      return {
+        grid,
+        lockedBox: boxToLock,
+      };
+    }
       
     default:
-      return grid;
+      return { grid };
   }
 }
 

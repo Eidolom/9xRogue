@@ -98,6 +98,11 @@ export default function PuzzleScreen() {
     const cell = gameState.grid[row][col];
     const isSelected = gameState.selectedCell?.row === row && gameState.selectedCell?.col === col;
     const corruption = cell.corruption / 3;
+    
+    const boxRow = Math.floor(row / 3);
+    const boxCol = Math.floor(col / 3);
+    const boxIndex = boxRow * 3 + boxCol;
+    const isBoxLocked = gameState.lockedBoxes.includes(boxIndex);
 
     let backgroundColor = cell.isFixed ? 'rgba(93, 188, 210, 0.1)' : '#000000';
     if (!cell.isFixed && corruption > 0) {
@@ -108,6 +113,9 @@ export default function PuzzleScreen() {
     }
     if (cell.isLocked) {
       backgroundColor = 'rgba(230, 176, 76, 0.2)';
+    }
+    if (isBoxLocked && !cell.isFixed) {
+      backgroundColor = 'rgba(230, 76, 76, 0.35)';
     }
 
     const isThickBorderRight = col % 3 === 2 && col !== 8;
@@ -129,7 +137,7 @@ export default function PuzzleScreen() {
         ]}
         onPress={() => selectCell(row, col)}
         activeOpacity={0.7}
-        disabled={cell.isLocked}
+        disabled={cell.isLocked || isBoxLocked}
       >
         {cell.value !== null && !cell.isHidden && (
           <Text
@@ -146,6 +154,11 @@ export default function PuzzleScreen() {
         {cell.isLocked && (
           <View style={styles.lockIcon}>
             <Text style={styles.lockText}>🔒</Text>
+          </View>
+        )}
+        {isBoxLocked && !cell.isFixed && (
+          <View style={styles.boxLockOverlay}>
+            <Text style={styles.boxLockText}>✖</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -481,7 +494,7 @@ const styles = StyleSheet.create({
   },
   lockText: {
     fontSize: 10,
-  },
+  } as const,
   pendingBadge: {
     padding: 4,
     backgroundColor: COLORS.background.primary,
@@ -552,9 +565,9 @@ const styles = StyleSheet.create({
   },
   bagBadgeText: {
     fontSize: 9,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     color: '#000000',
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
   },
   clearPuzzleButton: {
     width: 44,
@@ -610,5 +623,19 @@ const styles = StyleSheet.create({
     color: COLORS.text.secondary,
     fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
     letterSpacing: 1,
+  },
+  boxLockOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  boxLockText: {
+    fontSize: 16,
+    color: COLORS.accent.red,
+    fontWeight: 'bold',
   },
 });

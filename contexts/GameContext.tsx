@@ -224,6 +224,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       runSeed,
       shopsOpened: 0,
       raresSeenCount: 0,
+      lockedBoxes: [],
     };
   });
 
@@ -247,6 +248,17 @@ export const [GameContext, useGame] = createContextHook(() => {
     const cell = gameState.grid[row][col];
     
     if (cell.isFixed || cell.isLocked) return;
+    
+    const boxRow = Math.floor(row / 3);
+    const boxCol = Math.floor(col / 3);
+    const boxIndex = boxRow * 3 + boxCol;
+    if (gameState.lockedBoxes.includes(boxIndex)) {
+      console.log(`[CellLock] Cannot place number in locked box ${boxIndex}`);
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+      return;
+    }
 
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -368,12 +380,18 @@ export const [GameContext, useGame] = createContextHook(() => {
     const upgradeEffects = gameState.upgrades.map(u => u.effect);
     newGrid = applyCorruptionDegradation(newGrid, gameState.solution, upgradeEffects);
     
+    let newLockedBoxes = [...gameState.lockedBoxes];
+    
     const totalCorruption = getTotalCorruption(newGrid) + newCorruption;
     const corruptionThreshold = getCorruptionThreshold(gameState.floor);
-    const eventResult = triggerCorruptionEvent(newGrid, totalCorruption, corruptionThreshold);
+    const eventResult = triggerCorruptionEvent(newGrid, totalCorruption, corruptionThreshold, row, col);
     if (eventResult.eventType) {
       newGrid = eventResult.grid;
       console.log(`Corruption event triggered: ${eventResult.eventType}`);
+      if (eventResult.lockedBox !== undefined && !newLockedBoxes.includes(eventResult.lockedBox)) {
+        newLockedBoxes.push(eventResult.lockedBox);
+        console.log(`[CellLock] Box ${eventResult.lockedBox} has been locked!`);
+      }
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       }
@@ -504,6 +522,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       turnNumber: prev.turnNumber + 1,
       pendingValidations: newPendingValidations,
       ambiguityZones: newAmbiguityZones,
+      lockedBoxes: newLockedBoxes,
     }));
   }, [gameState]);
 
@@ -694,6 +713,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       ambiguityZones: zones,
       truthBeaconUsed: false,
       insightMarkersRemaining: prev.upgrades.filter(u => u.effect === 'ambiguity_hedge').length,
+      lockedBoxes: [],
     }));
 
     setPhase('puzzle');
@@ -756,6 +776,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       runSeed,
       shopsOpened: 0,
       raresSeenCount: 0,
+      lockedBoxes: [],
     });
 
     setPhase('puzzle');

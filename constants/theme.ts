@@ -13,6 +13,7 @@ export const COLORS = {
     amber: '#e6b04c',
     magenta: '#c46cc4',
     red: '#e64c4c',
+    green: '#4ce64c',
   },
   text: {
     primary: '#ffffff',

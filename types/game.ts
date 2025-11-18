@@ -73,7 +73,7 @@ export interface GameState {
   mistakes: number;
   maxMistakes: number;
   corruption: number;
-  coins: number;
+  currency: number;
   entropyDust: number;
   upgrades: Upgrade[];
   isComplete: boolean;
@@ -94,6 +94,7 @@ export interface GameState {
   runSeed: number;
   shopsOpened: number;
   raresSeenCount: number;
+  lockedBoxes: number[];
 }
 
 export interface AmbiguityZone {
