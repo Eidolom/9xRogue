@@ -10,7 +10,7 @@ export interface DifficultyLevel {
 export const DIFFICULTY_CURVE: DifficultyLevel[] = [
   {
     floor: 1,
-    description: 'Foundational discipline',
+    description: 'Naked Singles - Simple scanning',
     baseDifficulty: 35,
     modifiers: [
       {
@@ -21,38 +21,23 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
   },
   {
     floor: 2,
-    description: 'Mild opacity',
+    description: 'Hidden Singles - Basic deduction',
     baseDifficulty: 38,
     modifiers: [
       {
         type: 'delayed_validation',
         intensity: 3,
       },
-      {
-        type: 'fog',
-        intensity: 0.3,
-        regions: [1, 4, 7],
-      },
     ],
   },
   {
     floor: 3,
-    description: 'Localised uncertainty',
+    description: 'Pointing Pairs - Box reduction',
     baseDifficulty: 42,
     modifiers: [
       {
         type: 'delayed_validation',
         intensity: 4,
-      },
-      {
-        type: 'fog',
-        intensity: 0.4,
-        regions: [2, 5],
-      },
-      {
-        type: 'probabilistic_hints',
-        intensity: 0.6,
-        regions: [0],
       },
       {
         type: 'ambiguity_injection',
@@ -64,26 +49,17 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
   },
   {
     floor: 4,
-    description: 'Deterministic guess points',
+    description: 'Naked/Hidden Pairs - Pattern recognition',
     baseDifficulty: 46,
     modifiers: [
       {
         type: 'delayed_validation',
-        intensity: 5,
+        intensity: 4,
       },
       {
         type: 'fog',
-        intensity: 0.5,
-        regions: [3, 6],
-      },
-      {
-        type: 'probabilistic_hints',
-        intensity: 0.5,
+        intensity: 0.3,
         regions: [1, 4],
-      },
-      {
-        type: 'forced_bifurcation',
-        intensity: 1,
       },
       {
         type: 'ambiguity_injection',
@@ -95,7 +71,7 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
   },
   {
     floor: 5,
-    description: 'Interference mechanics',
+    description: 'Naked Triples - Complex patterns',
     baseDifficulty: 50,
     modifiers: [
       {
@@ -104,31 +80,24 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
       },
       {
         type: 'fog',
-        intensity: 0.5,
-        regions: [0, 8],
+        intensity: 0.4,
+        regions: [2, 5, 8],
       },
       {
-        type: 'candidate_shuffle',
-        intensity: 1,
-        regions: [2],
-        duration: 3000,
-      },
-      {
-        type: 'timed_hide',
-        intensity: 1,
-        duration: 5000,
+        type: 'candidate_suppression',
+        intensity: 0.3,
       },
       {
         type: 'ambiguity_injection',
         intensity: 1,
         ambiguityTier: 'A2',
-        pocketCount: 3,
+        pocketCount: 2,
       },
     ],
   },
   {
     floor: 6,
-    description: 'Constraint distortion',
+    description: 'X-Wing - Advanced technique',
     baseDifficulty: 54,
     modifiers: [
       {
@@ -137,13 +106,12 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
       },
       {
         type: 'fog',
-        intensity: 0.6,
-        regions: [1, 4, 7],
+        intensity: 0.5,
+        regions: [0, 3, 6],
       },
       {
-        type: 'constraint_suppression',
-        intensity: 1,
-        regions: [5],
+        type: 'candidate_suppression',
+        intensity: 0.4,
       },
       {
         type: 'recent_hide',
@@ -153,13 +121,13 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
         type: 'ambiguity_injection',
         intensity: 1,
         ambiguityTier: 'A3',
-        pocketCount: 2,
+        pocketCount: 3,
       },
     ],
   },
   {
     floor: 7,
-    description: 'Layered ambiguity',
+    description: 'XY-Wing - Three-cell hinge',
     baseDifficulty: 56,
     modifiers: [
       {
@@ -168,22 +136,21 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
       },
       {
         type: 'fog',
-        intensity: 0.7,
-        regions: [0, 2, 6, 8],
-      },
-      {
-        type: 'inverted_signals',
-        intensity: 1,
-        regions: [4],
+        intensity: 0.6,
+        regions: [1, 3, 5, 7],
       },
       {
         type: 'candidate_suppression',
         intensity: 0.5,
       },
       {
+        type: 'cell_lockout',
+        intensity: 2,
+      },
+      {
         type: 'candidate_shuffle',
         intensity: 1,
-        regions: [1, 7],
+        regions: [0, 8],
         duration: 3000,
       },
       {
@@ -196,7 +163,7 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
   },
   {
     floor: 8,
-    description: 'Systemic risk escalation',
+    description: 'Swordfish - 3x3 grid pattern',
     baseDifficulty: 58,
     modifiers: [
       {
@@ -205,8 +172,8 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
       },
       {
         type: 'fog',
-        intensity: 0.8,
-        regions: [0, 1, 2, 6, 7, 8],
+        intensity: 0.7,
+        regions: [0, 1, 2, 3, 5, 6],
       },
       {
         type: 'cell_lockout',
@@ -215,16 +182,16 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
       {
         type: 'candidate_shuffle',
         intensity: 1,
-        regions: [3, 4, 5],
+        regions: [4, 7, 8],
         duration: 2500,
-      },
-      {
-        type: 'recent_hide',
-        intensity: 4,
       },
       {
         type: 'candidate_suppression',
         intensity: 0.6,
+      },
+      {
+        type: 'recent_hide',
+        intensity: 4,
       },
       {
         type: 'ambiguity_injection',
@@ -236,7 +203,7 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
   },
   {
     floor: 9,
-    description: 'High-pressure composite logic',
+    description: 'Mixed Advanced + Ambiguity',
     baseDifficulty: 60,
     modifiers: [
       {
@@ -245,12 +212,12 @@ export const DIFFICULTY_CURVE: DifficultyLevel[] = [
       },
       {
         type: 'fog',
-        intensity: 0.9,
+        intensity: 0.8,
         regions: [0, 1, 2, 3, 4, 5, 6, 7, 8],
       },
       {
         type: 'cell_lockout',
-        intensity: 5,
+        intensity: 4,
       },
       {
         type: 'candidate_shuffle',
