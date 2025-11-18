@@ -456,10 +456,11 @@ export function cleanseCells(
 
 export function eraseAllCandidates(grid: GameGrid): GameGrid {
   return grid.map(row => 
-    row.map(cell => ({
-      ...cell,
-      candidates: [],
-    }))
+    row.map(cell => (
+      cell.corruption > 0
+        ? { ...cell, candidates: [] }
+        : cell
+    ))
   );
 }
 
