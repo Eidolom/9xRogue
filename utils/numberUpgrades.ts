@@ -46,7 +46,7 @@ export function applyRogueUpgradesAtStart(
     console.log('[RogueUpgrade] Triggering:', upgrade.effect);
 
     switch (upgrade.effect) {
-      case 'scout_omniscience':
+        case 'scout_omniscience': {
         const allOnes = findEmptyCellsForNumber(newGrid, solution, 1);
         for (const [row, col] of allOnes) {
           newGrid[row][col].candidates = [1];
@@ -55,6 +55,7 @@ export function applyRogueUpgradesAtStart(
         }
         console.log('[Scout] Revealed all 1s via Omniscience');
         break;
+      }
 
       case 'merchant_monopoly':
         console.log('[Merchant] Monopoly active - immune to inflation');
@@ -127,46 +128,136 @@ export function applyNumberUpgradeEffect(
   const state = getUpgradeState(placedNumber);
 
   switch (upgrade.effect) {
-    case 'scout_clear_fog_box': {
+    case 'scout_find_naked': {
+      const nakedSingle = findRandomNakedSingle(grid, solution);
+      if (nakedSingle) {
+        const [nRow, nCol] = nakedSingle;
+        const value = solution[nRow][nCol];
+        if (value !== null) {
+          result.grid = grid.map((r, i) =>
+            r.map((c, j) => {
+              if (i === nRow && j === nCol) {
+                return { ...c, candidates: [value] };
+              }
+              return c;
+            })
+          );
+          console.log('[Scout L1] Highlighted naked single at', nRow, nCol);
+        }
+      } else {
+        console.log('[Scout L1] No naked single found');
+      }
+      break;
+    }
+
+    case 'scout_fog_clear': {
+      const nakedSingle = findRandomNakedSingle(grid, solution);
+      if (nakedSingle) {
+        const [nRow, nCol] = nakedSingle;
+        const value = solution[nRow][nCol];
+        if (value !== null) {
+          result.grid = grid.map((r, i) =>
+            r.map((c, j) => {
+              if (i === nRow && j === nCol) {
+                return { ...c, candidates: [value] };
+              }
+              return c;
+            })
+          );
+        }
+      }
       const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
       const cells = getBoxCells(boxIndex);
-      result.grid = clearFogInCells(grid, cells);
-      console.log('[Scout L1] Cleared fog in box');
+      result.grid = clearFogInCells(result.grid, cells);
+      console.log('[Scout L2] Found naked single + cleared fog in box');
       break;
     }
 
-    case 'scout_clear_fog_rowcol': {
-      result.grid = clearFogInRow(grid, row);
-      result.grid = clearFogInColumn(result.grid, col);
-      console.log('[Scout L2] Cleared fog in row and column');
+    case 'scout_find_hidden': {
+      const hiddenSingle = findRandomHiddenSingle(grid, solution);
+      if (hiddenSingle) {
+        const [hRow, hCol] = hiddenSingle;
+        const value = solution[hRow][hCol];
+        if (value !== null) {
+          result.grid = grid.map((r, i) =>
+            r.map((c, j) => {
+              if (i === hRow && j === hCol) {
+                return { ...c, candidates: [value] };
+              }
+              return c;
+            })
+          );
+          console.log('[Scout L3] Highlighted hidden single at', hRow, hCol);
+        }
+      } else {
+        console.log('[Scout L3] No hidden single found');
+      }
       break;
     }
 
-    case 'scout_remove_phantoms_box': {
-      const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
-      const cells = getBoxCells(boxIndex);
-      result.grid = removePhantomCandidatesInCells(grid, solution, cells);
-      console.log('[Scout L3] Removed phantom candidates in box');
-      break;
-    }
-
-    case 'scout_reveal_hidden_rowcol': {
-      result.grid = revealHiddenInRow(grid, row);
-      result.grid = revealHiddenInColumn(result.grid, col);
-      console.log('[Scout L4] Revealed hidden numbers in row and column for 10s');
+    case 'scout_solve_single': {
+      const hiddenSingle = findRandomHiddenSingle(grid, solution);
+      if (hiddenSingle) {
+        const [hRow, hCol] = hiddenSingle;
+        result.grid = grid.map((r, i) =>
+          r.map((c, j) => {
+            if (i === hRow && j === hCol) {
+              return {
+                ...c,
+                value: solution[hRow][hCol],
+                isCorrect: true,
+                isFixed: false,
+              };
+            }
+            return c;
+          })
+        );
+        console.log('[Scout L4] Solved hidden single at', hRow, hCol);
+      } else {
+        console.log('[Scout L4] No hidden single found');
+      }
       break;
     }
 
     case 'scout_total_clarity': {
+      const hiddenSingle = findRandomHiddenSingle(grid, solution);
+      if (hiddenSingle) {
+        const [hRow, hCol] = hiddenSingle;
+        result.grid = grid.map((r, i) =>
+          r.map((c, j) => {
+            if (i === hRow && j === hCol) {
+              return {
+                ...c,
+                value: solution[hRow][hCol],
+                isCorrect: true,
+                isFixed: false,
+              };
+            }
+            return c;
+          })
+        );
+      }
       const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
       const cells = getBoxCells(boxIndex);
-      result.grid = clearFogInCells(grid, cells);
-      result.grid = clearFogInRow(result.grid, row);
-      result.grid = clearFogInColumn(result.grid, col);
-      result.grid = removePhantomCandidatesInCells(result.grid, solution, cells);
+      result.grid = clearFogInCells(result.grid, cells);
       result.grid = revealHiddenInRow(result.grid, row);
       result.grid = revealHiddenInColumn(result.grid, col);
-      console.log('[Scout L5] Total Clarity - all effects triggered');
+      console.log('[Scout L5] Total Clarity - solved hidden single + cleared fog + revealed hidden');
+      break;
+    }
+    
+    case 'scout_omniscience': {
+      const adjacentCells = getAdjacentCells(row, col);
+      result.grid = clearFogInCells(grid, adjacentCells);
+      result.grid = result.grid.map((r, i) =>
+        r.map((c, j) => {
+          if (adjacentCells.some(([aRow, aCol]) => aRow === i && aCol === j)) {
+            return { ...c, candidates: [] };
+          }
+          return c;
+        })
+      );
+      console.log('[Scout ROGUE] Omniscience - cleared fog in adjacent cells');
       break;
     }
 
@@ -303,15 +394,18 @@ export function applyNumberUpgradeEffect(
       const hiddenSingle = findRandomHiddenSingle(grid, solution);
       if (hiddenSingle) {
         const [hRow, hCol] = hiddenSingle;
-        result.grid = grid.map((r, i) =>
-          r.map((c, j) => {
-            if (i === hRow && j === hCol) {
-              return { ...c, candidates: [solution[hRow][hCol]] };
-            }
-            return c;
-          })
-        );
-        console.log('[Sniper L2] Highlighted hidden single');
+        const value = solution[hRow][hCol];
+        if (value !== null) {
+          result.grid = grid.map((r, i) =>
+            r.map((c, j) => {
+              if (i === hRow && j === hCol) {
+                return { ...c, candidates: [value] };
+              }
+              return c;
+            })
+          );
+          console.log('[Sniper L2] Highlighted hidden single');
+        }
       }
       break;
     }
@@ -685,6 +779,74 @@ function findEmptyCellsForNumber(grid: GameGrid, solution: Grid, number: number)
     }
   }
   return cells;
+}
+
+function findRandomNakedSingle(grid: GameGrid, solution: Grid): [number, number] | null {
+  const candidates: [number, number][] = [];
+  
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      if (grid[row][col].value === null && !grid[row][col].isFixed) {
+        if (isNakedSingle(grid, solution, row, col)) {
+          candidates.push([row, col]);
+        }
+      }
+    }
+  }
+  
+  if (candidates.length === 0) return null;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function isNakedSingle(grid: GameGrid, solution: Grid, row: number, col: number): boolean {
+  const digit = solution[row][col];
+  if (digit === null) return false;
+  
+  const numbersInRow: Set<number> = new Set();
+  const numbersInCol: Set<number> = new Set();
+  const numbersInBox: Set<number> = new Set();
+  
+  for (let i = 0; i < 9; i++) {
+    if (grid[row][i].value !== null) {
+      numbersInRow.add(grid[row][i].value!);
+    }
+    if (grid[i][col].value !== null) {
+      numbersInCol.add(grid[i][col].value!);
+    }
+  }
+  
+  const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
+  const boxCells = getBoxCells(boxIndex);
+  for (const [r, c] of boxCells) {
+    if (grid[r][c].value !== null) {
+      numbersInBox.add(grid[r][c].value!);
+    }
+  }
+  
+  const allNumbers: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  for (const num of numbersInRow) allNumbers.delete(num);
+  for (const num of numbersInCol) allNumbers.delete(num);
+  for (const num of numbersInBox) allNumbers.delete(num);
+  
+  return allNumbers.size === 1 && allNumbers.has(digit);
+}
+
+function getAdjacentCells(row: number, col: number): [number, number][] {
+  const adjacent: [number, number][] = [];
+  const directions = [
+    [-1, 0], [1, 0], [0, -1], [0, 1],
+    [-1, -1], [-1, 1], [1, -1], [1, 1]
+  ];
+  
+  for (const [dr, dc] of directions) {
+    const newRow = row + dr;
+    const newCol = col + dc;
+    if (newRow >= 0 && newRow < 9 && newCol >= 0 && newCol < 9) {
+      adjacent.push([newRow, newCol]);
+    }
+  }
+  
+  return adjacent;
 }
 
 function getBoxCells(boxIndex: number): [number, number][] {
