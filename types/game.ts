@@ -95,6 +95,9 @@ export interface GameState {
   shopsOpened: number;
   raresSeenCount: number;
   lockedBoxes: number[];
+  shieldCharges: number;
+  maxShieldCharges: number;
+  absolutionUsed: boolean;
 }
 
 export interface AmbiguityZone {

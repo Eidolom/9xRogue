@@ -12,6 +12,7 @@ export interface UpgradeEffectResult {
   shieldExpiry?: number;
   maxMistakesBonus?: number;
   inflationReduction?: number;
+  shieldChargeBonus?: number;
 }
 
 interface NumberUpgradeState {
@@ -342,32 +343,27 @@ export function applyNumberUpgradeEffect(
       break;
     }
 
-    case 'fortress_buffer_1':
+    case 'fortress_reinforce':
       result.maxMistakesBonus = 1;
-      console.log('[Fortress L1] +1 mistake buffer');
+      console.log('[Fortress L1] Reinforce +1 mistake buffer');
       break;
 
-    case 'fortress_shield_15':
-      result.shieldActive = true;
-      result.shieldExpiry = Date.now() + 15000;
-      state.activeShield = result.shieldExpiry;
-      console.log('[Fortress L2] Shield for 15s');
+    case 'fortress_shield_charge':
+      result.shieldChargeBonus = 1;
+      console.log('[Fortress L2] Shield Charge +1 charge');
       break;
 
-    case 'fortress_buffer_2':
+    case 'fortress_fortify':
       result.maxMistakesBonus = 2;
-      console.log('[Fortress L3] +2 mistake buffer');
+      console.log('[Fortress L3] Fortify +2 mistake buffer');
       break;
 
-    case 'fortress_shield_30':
-      result.shieldActive = true;
-      result.shieldExpiry = Date.now() + 30000;
-      state.activeShield = result.shieldExpiry;
-      console.log('[Fortress L4] Shield for 30s');
+    case 'fortress_armory':
+      console.log('[Fortress L4] Armory - max shield charges increased (passive)');
       break;
 
-    case 'fortress_start_shield':
-      console.log('[Fortress L5] Start with shield (passive)');
+    case 'fortress_bastion':
+      console.log('[Fortress L5] Bastion - start with shield charge (passive)');
       break;
 
     case 'catalyst_ignite':

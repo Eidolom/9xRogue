@@ -232,6 +232,9 @@ export const [GameContext, useGame] = createContextHook(() => {
       shopsOpened: 0,
       raresSeenCount: 0,
       lockedBoxes: [],
+      shieldCharges: 0,
+      maxShieldCharges: 0,
+      absolutionUsed: false,
     };
   });
 
@@ -325,6 +328,21 @@ export const [GameContext, useGame] = createContextHook(() => {
       
       let mistakesToAdd = validationResult.mistakes;
       
+      if (mistakesToAdd > 0 && gameState.shieldCharges > 0) {
+        const shieldsToConsume = Math.min(mistakesToAdd, gameState.shieldCharges);
+        mistakesToAdd -= shieldsToConsume;
+        console.log(`[Fortress] Shield absorbed ${shieldsToConsume} mistake(s). Shields remaining: ${gameState.shieldCharges - shieldsToConsume}`);
+        
+        setGameState(prev => ({
+          ...prev,
+          shieldCharges: prev.shieldCharges - shieldsToConsume,
+        }));
+        
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+      }
+      
       const corruptedCore = gameState.upgrades.find(u => u.effect === 'corrupt_gold');
       if (corruptedCore && mistakesToAdd > 0) {
         const goldBonus = mistakesToAdd * 10;
@@ -344,6 +362,25 @@ export const [GameContext, useGame] = createContextHook(() => {
             console.log(`[Mistake] Neutralized ${neutralizeCount} mistakes using ${upgrade.name}. Charges left: ${newUpgrades[i].charges}`);
             if (mistakesToAdd === 0) break;
           }
+        }
+      }
+      
+      const absolutionReady = gameState.upgrades.some(u => u.effect === 'fortress_absolution') && !gameState.absolutionUsed;
+      if (absolutionReady && newMistakes + mistakesToAdd >= gameState.maxMistakes) {
+        console.log('[Fortress] Absolution triggered! Resurrection activated.');
+        newMistakes = 0;
+        mistakesToAdd = 0;
+        newGrid = newGrid.map(r => r.map(c => ({ ...c, corruption: 0 })));
+        
+        setGameState(prev => ({
+          ...prev,
+          mistakes: 0,
+          absolutionUsed: true,
+          corruption: 0,
+        }));
+        
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
       }
       
@@ -462,6 +499,8 @@ export const [GameContext, useGame] = createContextHook(() => {
     }
     
     const isCorrectPlacement = gameState.solution[row][col] === num;
+    let newShieldCharges = gameState.shieldCharges;
+    const currentMaxShields = gameState.maxShieldCharges;
     
     const goldenDie = gameState.upgrades.find(u => u.effect === 'golden_number');
     if (goldenDie && isCorrectPlacement) {
@@ -503,6 +542,11 @@ export const [GameContext, useGame] = createContextHook(() => {
           }
           if (result.maxMistakesBonus !== undefined) {
             console.log(`[NumberUpgrade] Max mistakes bonus: +${result.maxMistakesBonus}`);
+          }
+          if (result.shieldChargeBonus !== undefined && currentMaxShields > 0) {
+            const newCharges = Math.min(newShieldCharges + result.shieldChargeBonus, currentMaxShields);
+            newShieldCharges = newCharges;
+            console.log(`[Fortress] Gained ${result.shieldChargeBonus} Shield Charge. Total: ${newShieldCharges}/${currentMaxShields}`);
           }
           upgradeTriggered = true;
           console.log(`[NumberUpgrade] Triggered: ${upgrade.effect}`);
@@ -554,6 +598,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       pendingValidations: newPendingValidations,
       ambiguityZones: newAmbiguityZones,
       lockedBoxes: newLockedBoxes,
+      shieldCharges: newShieldCharges,
     }));
   }, [gameState]);
 
@@ -808,6 +853,21 @@ export const [GameContext, useGame] = createContextHook(() => {
     console.log('[RogueUpgrades] Applied at floor start. New currency:', startCurrency);
     
     const initialCorruption = getTotalCorruption(grid);
+    
+    let newMaxShieldCharges = 0;
+    let newShieldCharges = 0;
+    
+    if (gameState.upgrades.some(u => u.effect === 'fortress_shield_charge')) {
+      newMaxShieldCharges = 1;
+    }
+    if (gameState.upgrades.some(u => u.effect === 'fortress_armory')) {
+      newMaxShieldCharges = 2;
+    }
+    if (gameState.upgrades.some(u => u.effect === 'fortress_bastion')) {
+      newMaxShieldCharges = 3;
+      newShieldCharges = 1;
+      console.log('[Fortress] Bastion active - starting with 1 shield charge');
+    }
 
     setGameState(prev => ({
       ...prev,
@@ -833,6 +893,9 @@ export const [GameContext, useGame] = createContextHook(() => {
       truthBeaconUsed: false,
       insightMarkersRemaining: prev.upgrades.filter(u => u.effect === 'ambiguity_hedge').length,
       lockedBoxes: [],
+      maxShieldCharges: newMaxShieldCharges,
+      shieldCharges: newShieldCharges,
+      absolutionUsed: false,
     }));
 
     setPhase('puzzle');
@@ -898,6 +961,9 @@ export const [GameContext, useGame] = createContextHook(() => {
       shopsOpened: 0,
       raresSeenCount: 0,
       lockedBoxes: [],
+      shieldCharges: 0,
+      maxShieldCharges: 0,
+      absolutionUsed: false,
     });
 
     setPhase('puzzle');
