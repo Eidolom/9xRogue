@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, Platform, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/contexts/GameContext';
-import { Trash2, Sparkles, ShoppingBag, Eye, DollarSign, Laugh, Shield, Zap, Dices, Target, PowerIcon, Trophy, RotateCcw, Check, Edit3, BookOpen } from 'lucide-react-native';
+import { Trash2, ShoppingBag, Eye, DollarSign, Laugh, Shield, Zap, Dices, Target, PowerIcon, Trophy, RotateCcw, Check, Edit3, BookOpen } from 'lucide-react-native';
 import CRTBackground from './CRTBackground';
 import InventoryScreen from './InventoryScreen';
 import GrimoireScreen from './GrimoireScreen';
@@ -414,17 +414,6 @@ export default function PuzzleScreen() {
 
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <View style={styles.headerRow}>
-          <View style={styles.headerInfo}>
-            <View style={styles.infoCard}>
-              <Text style={styles.infoLabel}>FLR</Text>
-              <Text style={styles.infoValue}>{gameState.floor}/{gameState.maxFloors}</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <Sparkles size={14} color={COLORS.accent.amber} />
-              <Text style={styles.infoValue}>{gameState.currency}</Text>
-            </View>
-          </View>
-          
           <View style={styles.headerActions}>
             <TouchableOpacity
               style={styles.bagButton}
@@ -578,36 +567,9 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     marginBottom: 8,
-  },
-  headerInfo: {
-    flexDirection: 'row',
-    gap: 8,
-    flex: 1,
-  },
-  infoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.background.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: BORDER.thick,
-    borderColor: COLORS.primary.cyan,
-    gap: 6,
-  },
-  infoLabel: {
-    fontSize: 10,
-    color: COLORS.text.secondary,
-    fontWeight: 'bold' as const,
-    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
-  },
-  infoValue: {
-    fontSize: 12,
-    color: COLORS.text.primary,
-    fontWeight: 'bold' as const,
-    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
   },
   statsRow: {
     flexDirection: 'row',
