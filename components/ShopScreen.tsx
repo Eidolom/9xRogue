@@ -163,7 +163,7 @@ export default function ShopScreen() {
         number: (offer as any).digit,
         effect: offer.effect,
         cost: totalOF,
-        rarity: offer.rarity.toLowerCase() as 'common' | 'uncommon' | 'rare' | 'epic' | 'rogue',
+        rarity: 'common',
       };
     } else if (offer.type === 'Consumable') {
       upgrade = {
@@ -173,7 +173,7 @@ export default function ShopScreen() {
         type: 'consumable',
         effect: offer.effect,
         cost: totalOF,
-        rarity: offer.rarity.toLowerCase() as 'common' | 'uncommon' | 'rare' | 'epic' | 'rogue',
+        rarity: offer.rarity?.toLowerCase() as 'common' | 'uncommon' | 'rare' | 'epic' | 'rogue' || 'common',
         charges: 1,
         maxCharges: 1,
       };
@@ -185,7 +185,7 @@ export default function ShopScreen() {
         type: 'passive',
         effect: offer.effect,
         cost: totalOF,
-        rarity: offer.rarity.toLowerCase() as 'common' | 'uncommon' | 'rare' | 'epic' | 'rogue',
+        rarity: offer.rarity?.toLowerCase() as 'common' | 'uncommon' | 'rare' | 'epic' | 'rogue' || 'common',
       };
     }
 
@@ -210,7 +210,8 @@ export default function ShopScreen() {
     nextFloor();
   };
 
-  const getRarityColor = (rarity: string): string => {
+  const getRarityColor = (rarity?: string): string => {
+    if (!rarity) return COLORS.text.secondary;
     switch (rarity) {
       case 'Rogue':
         return '#C44CC4';
@@ -225,7 +226,8 @@ export default function ShopScreen() {
     }
   };
 
-  const getRarityBg = (rarity: string): string => {
+  const getRarityBg = (rarity?: string): string => {
+    if (!rarity) return 'rgba(93, 188, 210, 0.05)';
     switch (rarity) {
       case 'Rogue':
         return 'rgba(196, 76, 196, 0.15)';
@@ -347,11 +349,11 @@ export default function ShopScreen() {
                       <View style={[styles.levelBadge, { backgroundColor: COLORS.primary.cyan }]}>
                         <Text style={styles.levelText}>LVL {offer.tier}</Text>
                       </View>
-                    ) : (
+                    ) : offer.rarity ? (
                       <View style={[styles.rarityBadge, { backgroundColor: rarityColor }]}>
                         <Text style={styles.rarityText}>{offer.rarity.toUpperCase()}</Text>
                       </View>
-                    )}
+                    ) : null}
                     {offer.type === 'NumberUpgrade' && offer.digit && (
                       <View style={[styles.iconBadge, { backgroundColor: COLORS.primary.cyan }]}>
                         <PixelIcon number={offer.digit} size={20} color="#000000" />
@@ -450,11 +452,11 @@ export default function ShopScreen() {
                   <View style={[styles.modalLevelBadge, { backgroundColor: COLORS.primary.cyan }]}>
                     <Text style={styles.modalLevelText}>LEVEL {selectedOffer.tier}</Text>
                   </View>
-                ) : (
+                ) : selectedOffer.rarity ? (
                   <View style={[styles.modalRarityBadge, { backgroundColor: getRarityColor(selectedOffer.rarity) }]}>
                     <Text style={styles.modalRarityText}>{selectedOffer.rarity.toUpperCase()}</Text>
                   </View>
-                )}
+                ) : null}
 
                 <Text style={styles.modalTitle}>{selectedOffer.descriptionShort}</Text>
                 <Text style={styles.modalType}>{getOfferTypeLabel(selectedOffer)}</Text>

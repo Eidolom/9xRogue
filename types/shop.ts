@@ -7,7 +7,7 @@ export interface ShopOffer {
   type: OfferType;
   digit?: number;
   tier?: number;
-  rarity: Rarity;
+  rarity?: Rarity;
   baseCostOF: number;
   baseCostED: number;
   runLimited: boolean;
