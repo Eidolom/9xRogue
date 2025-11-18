@@ -29,7 +29,8 @@ export function createAmbiguityZone(
     if (candidates.length > 1) {
       alternativeSolutions.push(candidates.slice(0, Math.min(candidates.length, pocketSize)));
     } else {
-      alternativeSolutions.push([solution[cell.row][cell.col]]);
+      const solutionValue = solution[cell.row][cell.col];
+      alternativeSolutions.push(solutionValue !== null ? [solutionValue] : []);
     }
   }
   
@@ -55,7 +56,8 @@ function findEmptyCellsInRow(grid: Grid, row: number, count: number): { row: num
   const cells: { row: number; col: number }[] = [];
   
   for (let col = 0; col < 9 && cells.length < count; col++) {
-    if (grid[row][col] === null) {
+    const cellValue = grid[row][col];
+    if (cellValue === null || cellValue === 0) {
       cells.push({ row, col });
     }
   }
@@ -72,7 +74,8 @@ function findEmptyCellsInRegion(grid: Grid, region: number, count: number): { ro
     for (let j = 0; j < 3 && cells.length < count; j++) {
       const row = startRow + i;
       const col = startCol + j;
-      if (grid[row][col] === null) {
+      const cellValue = grid[row][col];
+      if (cellValue === null || cellValue === 0) {
         cells.push({ row, col });
       }
     }

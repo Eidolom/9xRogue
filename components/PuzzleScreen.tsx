@@ -386,13 +386,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.text.secondary,
     fontWeight: 'bold' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
   },
   infoValue: {
     fontSize: 12,
     color: COLORS.text.primary,
     fontWeight: 'bold' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
   },
   statsRow: {
     flexDirection: 'row',
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     color: COLORS.text.secondary,
     marginBottom: 3,
     fontWeight: 'bold' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
   },
   barContainer: {
     height: 6,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold' as const,
     textAlign: 'center' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
     letterSpacing: 1,
   },
   gameArea: {
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     fontSize: CELL_SIZE * 0.5,
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
   },
   fixedText: {
     color: COLORS.text.secondary,
@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 'bold' as const,
     textAlign: 'center' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
     letterSpacing: 1,
   },
   controls: {
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
   },
   numberIcon: {
     position: 'absolute' as const,
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 'bold' as const,
     color: '#000000',
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
   },
   clearPuzzleButton: {
     width: 44,
@@ -615,13 +615,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.primary.cyan,
     marginBottom: 12,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
     letterSpacing: 2,
   },
   completeText: {
     fontSize: 14,
     color: COLORS.text.secondary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
     letterSpacing: 1,
   },
   boxLockOverlay: {

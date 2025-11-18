@@ -323,7 +323,7 @@ export function getTotalCorruption(grid: GameGrid): number {
 export function cleanseCells(
   grid: GameGrid,
   targetCount: number
-): GameGrid {
+): { grid: GameGrid; cellsCleansed: number } {
   const corruptedCells: [number, number][] = [];
   
   for (let i = 0; i < 9; i++) {
@@ -340,12 +340,14 @@ export function cleanseCells(
   
   const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
   
-  for (let i = 0; i < Math.min(targetCount, corruptedCells.length); i++) {
+  const cleansedCount = Math.min(targetCount, corruptedCells.length);
+  
+  for (let i = 0; i < cleansedCount; i++) {
     const [row, col] = corruptedCells[i];
     newGrid[row][col].corruption = 0;
     newGrid[row][col].isFogged = false;
     newGrid[row][col].isHidden = false;
   }
   
-  return newGrid;
+  return { grid: newGrid, cellsCleansed: cleansedCount };
 }

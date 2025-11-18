@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GameState, GamePhase, Upgrade, Cell, GameGrid, LevelModifier, MoveHistory, AmbiguityZone } from '@/types/game';
+import { GameState, GamePhase, Upgrade, Cell, GameGrid, LevelModifier, MoveHistory, AmbiguityZone, Grid } from '@/types/game';
 import { ShopSession, ShopOffer } from '@/types/shop';
 import { createShopSession, rerollShop, purchaseOffer as purchaseShopOffer, calculateRerollCost, calculateEDRerollCost, emitShopAnalytics } from '@/utils/shop';
 import { generatePuzzle, checkPuzzleComplete, countFilledCells } from '@/utils/sudoku';
@@ -39,7 +39,7 @@ import { Achievement, GameStats } from '@/types/achievements';
 import { ACHIEVEMENTS } from '@/constants/achievements';
 import { applyNumberUpgradeEffect, applyRogueUpgradesAtStart } from '@/utils/numberUpgrades';
 
-function createGameGrid(puzzle: number[][], solution: number[][], modifiers: LevelModifier[]): { grid: GameGrid; zones: AmbiguityZone[] } {
+function createGameGrid(puzzle: Grid, solution: Grid, modifiers: LevelModifier[]): { grid: GameGrid; zones: AmbiguityZone[] } {
   let grid: GameGrid = puzzle.map((row, i) => 
     row.map((cell, j) => initializeCell(cell, cell !== null))
   );
