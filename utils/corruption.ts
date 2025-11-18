@@ -147,7 +147,6 @@ export function applyCorruptionDegradation(
   solution: Grid,
   upgrades: string[]
 ): GameGrid {
-  const hasCorruptionResist = upgrades.includes('corruption_shield');
   const hasDegradationResist = upgrades.includes('degradation_resist');
   const degradationMultiplier = hasDegradationResist ? 0.25 : 1.0;
   
@@ -157,22 +156,6 @@ export function applyCorruptionDegradation(
       
       const corruptionLevel = cell.corruption;
       const newCell = { ...cell };
-      
-      if (corruptionLevel >= 1 && !hasCorruptionResist) {
-        const candidates = calculateCandidates(grid, solution, i, j);
-        if (Math.random() < 0.3 * corruptionLevel * degradationMultiplier) {
-          newCell.candidates = shuffleCandidates(candidates);
-        }
-      }
-      
-      if (corruptionLevel >= 2) {
-        if (Math.random() < 0.2 * corruptionLevel * degradationMultiplier) {
-          const phantomCandidates = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-            .filter(n => !newCell.candidates.includes(n))
-            .slice(0, Math.floor(Math.random() * 3) + 1);
-          newCell.candidates = [...newCell.candidates, ...phantomCandidates];
-        }
-      }
       
       if (corruptionLevel >= 3) {
         if (Math.random() < 0.15 * degradationMultiplier) {
@@ -186,48 +169,9 @@ export function applyCorruptionDegradation(
         }
       }
       
-      if (corruptionLevel >= 5) {
-        if (Math.random() < 0.05 * degradationMultiplier) {
-          newCell.candidates = [];
-        }
-      }
-      
       return newCell;
     })
   );
-}
-
-function calculateCandidates(grid: GameGrid, solution: Grid, row: number, col: number): number[] {
-  if (grid[row][col].value !== null) return [];
-  
-  const used = new Set<number>();
-  
-  for (let c = 0; c < 9; c++) {
-    const val = grid[row][c].value;
-    if (val !== null) {
-      used.add(val);
-    }
-  }
-  
-  for (let r = 0; r < 9; r++) {
-    const val = grid[r][col].value;
-    if (val !== null) {
-      used.add(val);
-    }
-  }
-  
-  const boxRow = Math.floor(row / 3) * 3;
-  const boxCol = Math.floor(col / 3) * 3;
-  for (let r = boxRow; r < boxRow + 3; r++) {
-    for (let c = boxCol; c < boxCol + 3; c++) {
-      const val = grid[r][c].value;
-      if (val !== null) {
-        used.add(val);
-      }
-    }
-  }
-  
-  return [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(n => !used.has(n));
 }
 
 function shuffleCandidates(candidates: number[]): number[] {

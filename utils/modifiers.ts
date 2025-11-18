@@ -61,13 +61,9 @@ export function applyFogModifier(
     row.map((cell, j) => {
       const region = getCellRegion(i, j);
       if (modifier.regions!.includes(region) && !cell.isFixed) {
-        const rawCandidates = getCandidatesForCell(solution, i, j);
-        const foggedCandidates = rawCandidates.filter(() => Math.random() < 0.7);
-        
         return {
           ...cell,
           isFogged: true,
-          candidates: foggedCandidates,
         };
       }
       return cell;
@@ -80,23 +76,7 @@ export function applyProbabilisticHints(
   solution: Grid,
   modifier: LevelModifier
 ): GameGrid {
-  if (!modifier.regions) return grid;
-  
-  return grid.map((row, i) => 
-    row.map((cell, j) => {
-      const region = getCellRegion(i, j);
-      if (modifier.regions!.includes(region) && !cell.isFixed && cell.value === null) {
-        const rawCandidates = getCandidatesForCell(solution, i, j);
-        const filteredCandidates = rawCandidates.filter(() => Math.random() < modifier.intensity);
-        
-        return {
-          ...cell,
-          candidates: filteredCandidates.length > 0 ? filteredCandidates : rawCandidates,
-        };
-      }
-      return cell;
-    })
-  );
+  return grid;
 }
 
 export function applyCandidateSuppression(
@@ -104,20 +84,7 @@ export function applyCandidateSuppression(
   solution: Grid,
   modifier: LevelModifier
 ): GameGrid {
-  return grid.map((row, i) => 
-    row.map((cell, j) => {
-      if (!cell.isFixed && cell.value === null) {
-        const rawCandidates = getCandidatesForCell(solution, i, j);
-        const suppressedCandidates = rawCandidates.filter(() => Math.random() < modifier.intensity);
-        
-        return {
-          ...cell,
-          candidates: suppressedCandidates.length > 0 ? suppressedCandidates : [rawCandidates[0]],
-        };
-      }
-      return cell;
-    })
-  );
+  return grid;
 }
 
 export function applyRecentHide(

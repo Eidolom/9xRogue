@@ -106,7 +106,6 @@ export function applyAmbiguityInjection(
                 isAmbiguous: candidates.length > 1,
                 ambiguousValues: candidates,
                 ambiguityLevel: zone.tier,
-                candidates: candidates.length > 1 ? candidates : c.candidates,
               };
             }
             return c;
