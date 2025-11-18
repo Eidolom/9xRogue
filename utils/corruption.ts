@@ -200,7 +200,8 @@ export function triggerCorruptionEvent(
   totalCorruption: number,
   threshold: number,
   mistakeRow?: number,
-  mistakeCol?: number
+  mistakeCol?: number,
+  upgradeEffects?: string[]
 ): { grid: GameGrid; eventType: CorruptionEventType | null; lockedBox?: number } {
   const corruptionPercent = totalCorruption / threshold;
   
@@ -208,13 +209,24 @@ export function triggerCorruptionEvent(
     return { grid, eventType: null };
   }
   
-  const events: CorruptionEventType[] = [
+  const flowStateImmunity = upgradeEffects?.includes('jester_flow_state') || false;
+  
+  let events: CorruptionEventType[] = [
     'cascade_fog',
     'candidate_chaos',
     'region_inversion',
     'phantom_lock',
     'cell_lock',
   ];
+  
+  if (flowStateImmunity) {
+    events = events.filter(e => e !== 'candidate_chaos');
+    console.log('[FlowState] Candidate Chaos blocked by Jester immunity');
+  }
+  
+  if (events.length === 0) {
+    return { grid, eventType: null };
+  }
   
   const eventType = events[Math.floor(Math.random() * events.length)];
   const result = applyCorruptionEvent(grid, eventType, mistakeRow, mistakeCol);

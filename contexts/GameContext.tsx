@@ -384,7 +384,7 @@ export const [GameContext, useGame] = createContextHook(() => {
     
     const totalCorruption = getTotalCorruption(newGrid) + newCorruption;
     const corruptionThreshold = getCorruptionThreshold(gameState.floor);
-    const eventResult = triggerCorruptionEvent(newGrid, totalCorruption, corruptionThreshold, row, col);
+    const eventResult = triggerCorruptionEvent(newGrid, totalCorruption, corruptionThreshold, row, col, upgradeEffects);
     if (eventResult.eventType) {
       newGrid = eventResult.grid;
       console.log(`Corruption event triggered: ${eventResult.eventType}`);
@@ -557,6 +557,71 @@ export const [GameContext, useGame] = createContextHook(() => {
       ...prev,
       grid: newGrid,
       completedCells: newCompletedCells,
+    }));
+  }, [gameState]);
+
+  const toggleCandidate = useCallback((num: number) => {
+    if (!gameState.selectedCell || gameState.isComplete || gameState.gameOver) return;
+
+    const { row, col } = gameState.selectedCell;
+    const cell = gameState.grid[row][col];
+    
+    if (cell.isFixed || cell.value !== null) return;
+
+    if (Platform.OS !== 'web') {
+      Haptics.selectionAsync();
+    }
+
+    const newGrid = gameState.grid.map((r, i) => 
+      r.map((c, j) => {
+        if (i === row && j === col) {
+          const currentCandidates = c.candidates || [];
+          const hasCandidate = currentCandidates.includes(num);
+          
+          return {
+            ...c,
+            candidates: hasCandidate
+              ? currentCandidates.filter(n => n !== num)
+              : [...currentCandidates, num].sort((a, b) => a - b),
+          };
+        }
+        return c;
+      })
+    );
+
+    setGameState(prev => ({
+      ...prev,
+      grid: newGrid,
+    }));
+  }, [gameState]);
+
+  const clearCandidates = useCallback(() => {
+    if (!gameState.selectedCell || gameState.isComplete || gameState.gameOver) return;
+
+    const { row, col } = gameState.selectedCell;
+    const cell = gameState.grid[row][col];
+    
+    if (cell.isFixed || cell.value !== null) return;
+
+    if (Platform.OS !== 'web') {
+      Haptics.selectionAsync();
+    }
+
+    const newGrid = gameState.grid.map((r, i) => 
+      r.map((c, j) => {
+        if (i === row && j === col) {
+          return {
+            ...c,
+            candidates: [],
+          };
+        }
+        return c;
+      })
+    );
+
+    setGameState(prev => ({
+      ...prev,
+      grid: newGrid,
     }));
   }, [gameState]);
 
@@ -1052,6 +1117,8 @@ export const [GameContext, useGame] = createContextHook(() => {
     selectCell,
     placeNumber,
     clearCell,
+    toggleCandidate,
+    clearCandidates,
     completeFloor,
     purchaseUpgrade,
     nextFloor,

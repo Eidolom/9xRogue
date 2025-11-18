@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/contexts/GameContext';
-import { Trash2, Sparkles, ShoppingBag, Eye, DollarSign, Laugh, Shield, Zap, Dices, Target, PowerIcon, Trophy, RotateCcw, Check } from 'lucide-react-native';
+import { Trash2, Sparkles, ShoppingBag, Eye, DollarSign, Laugh, Shield, Zap, Dices, Target, PowerIcon, Trophy, RotateCcw, Check, Edit3 } from 'lucide-react-native';
 import CRTBackground from './CRTBackground';
 import InventoryScreen from './InventoryScreen';
 import { COLORS, BORDER } from '@/constants/theme';
@@ -40,9 +40,10 @@ const NUMBER_NAMES = [
 
 export default function PuzzleScreen() {
   const insets = useSafeAreaInsets();
-  const { gameState, selectCell, placeNumber, clearCell, completeFloor, clearPuzzle, solvePuzzle } = useGame();
+  const { gameState, selectCell, placeNumber, clearCell, toggleCandidate, completeFloor, clearPuzzle, solvePuzzle } = useGame();
   const corruptionAnim = useRef(new Animated.Value(0)).current;
   const [showInventory, setShowInventory] = useState(false);
+  const [pencilMode, setPencilMode] = useState(false);
 
   const numberUpgradeLevels = useMemo(() => {
     const levels: Record<number, { level: number; color: string; rarity: string }> = {};
@@ -139,7 +140,7 @@ export default function PuzzleScreen() {
         activeOpacity={0.7}
         disabled={cell.isLocked || isBoxLocked}
       >
-        {cell.value !== null && !cell.isHidden && (
+        {cell.value !== null && !cell.isHidden ? (
           <Text
             style={[
               styles.cellText,
@@ -150,7 +151,17 @@ export default function PuzzleScreen() {
           >
             {cell.value}
           </Text>
-        )}
+        ) : cell.candidates && cell.candidates.length > 0 ? (
+          <View style={styles.candidatesContainer}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+              <View key={num} style={styles.candidateCell}>
+                {cell.candidates.includes(num) && (
+                  <Text style={styles.candidateText}>{num}</Text>
+                )}
+              </View>
+            ))}
+          </View>
+        ) : null}
         {cell.isLocked && (
           <View style={styles.lockIcon}>
             <Text style={styles.lockText}>🔒</Text>
@@ -186,6 +197,14 @@ export default function PuzzleScreen() {
     const Icon = NUMBER_ICONS[num];
     const hasUpgrade = !!upgradeInfo;
     
+    const handlePress = () => {
+      if (pencilMode) {
+        toggleCandidate(num);
+      } else {
+        placeNumber(num);
+      }
+    };
+    
     return (
       <TouchableOpacity
         key={num}
@@ -195,8 +214,9 @@ export default function PuzzleScreen() {
             borderColor: upgradeInfo.color,
             backgroundColor: `${upgradeInfo.color}15`,
           },
+          pencilMode && styles.numberButtonPencil,
         ]}
-        onPress={() => placeNumber(num)}
+        onPress={handlePress}
         activeOpacity={0.7}
       >
         {Icon && hasUpgrade && (
@@ -270,6 +290,14 @@ export default function PuzzleScreen() {
               activeOpacity={0.7}
             >
               <Check size={16} color={COLORS.accent.green} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.pencilButton, pencilMode && styles.pencilButtonActive]}
+              onPress={() => setPencilMode(!pencilMode)}
+              activeOpacity={0.7}
+            >
+              <Edit3 size={18} color={pencilMode ? COLORS.accent.amber : COLORS.primary.cyan} />
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -587,11 +615,24 @@ const styles = StyleSheet.create({
     borderWidth: BORDER.thick,
     borderColor: COLORS.accent.green,
   },
+  pencilButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: COLORS.background.primary,
+    borderWidth: BORDER.thick,
+    borderColor: COLORS.primary.cyan,
+  },
+  pencilButtonActive: {
+    backgroundColor: 'rgba(230, 176, 76, 0.2)',
+    borderColor: COLORS.accent.amber,
+  },
   clearButton: {
     width: 44,
     height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
     backgroundColor: COLORS.background.primary,
     borderWidth: BORDER.thick,
     borderColor: COLORS.accent.red,
@@ -636,6 +677,28 @@ const styles = StyleSheet.create({
   boxLockText: {
     fontSize: 16,
     color: COLORS.accent.red,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
+  },
+  candidatesContainer: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    width: '100%',
+    height: '100%',
+    padding: 1,
+  },
+  candidateCell: {
+    width: '33.33%',
+    height: '33.33%',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+  },
+  candidateText: {
+    fontSize: CELL_SIZE * 0.25,
+    color: COLORS.text.secondary,
+    fontWeight: 'bold' as const,
+    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
+  },
+  numberButtonPencil: {
+    backgroundColor: 'rgba(230, 176, 76, 0.1)',
   },
 });
