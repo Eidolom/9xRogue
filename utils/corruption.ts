@@ -15,38 +15,59 @@ export type CorruptionEventType =
   | 'phantom_lock'
   | 'cell_lock';
 
-export function getCorruptionThreshold(floor: number): number {
-  return Math.min(20 + (floor * 5), 50);
+export function getCorruptionThreshold(): number {
+  return 50;
+}
+
+export function getCorruptionThresholds(): number[] {
+  return [10, 20, 30, 40, 50];
+}
+
+export function getCorruptionEventAtThreshold(threshold: number): CorruptionEventType | 'lose' | null {
+  switch (threshold) {
+    case 10:
+      return 'candidate_chaos';
+    case 20:
+      return 'cell_lock';
+    case 30:
+      return 'candidate_chaos';
+    case 40:
+      return 'cell_lock';
+    case 50:
+      return 'lose';
+    default:
+      return null;
+  }
 }
 
 export function spreadCorruption(
   grid: GameGrid,
   sourceRow: number,
-  sourceCol: number,
-  mistakeCount: number,
-  totalCorruption: number
+  sourceCol: number
 ): CorruptionSpreadResult {
   const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
-  let corruptionAdded = 0;
   
-  const baseSpreadChance = 0.3;
-  const mistakeMultiplier = Math.min(mistakeCount * 0.15, 0.5);
-  const spreadChance = Math.min(baseSpreadChance + mistakeMultiplier, 0.8);
+  newGrid[sourceRow][sourceCol].corruption = 1;
   
   const connectedCells = getConnectedCells(sourceRow, sourceCol);
+  const uncorruptedCells = connectedCells.filter(
+    ([r, c]) => newGrid[r][c].corruption === 0
+  );
   
-  for (const [row, col] of connectedCells) {
-    if (Math.random() < spreadChance) {
-      const currentCorruption = newGrid[row][col].corruption;
-      const corruptionIncrease = 1 + Math.floor(mistakeCount * 0.5);
-      newGrid[row][col].corruption = Math.min(currentCorruption + corruptionIncrease, 5);
-      corruptionAdded += corruptionIncrease;
-    }
+  const spreadTargets: [number, number][] = [];
+  for (let i = 0; i < Math.min(2, uncorruptedCells.length); i++) {
+    const randomIndex = Math.floor(Math.random() * uncorruptedCells.length);
+    spreadTargets.push(uncorruptedCells[randomIndex]);
+    uncorruptedCells.splice(randomIndex, 1);
+  }
+  
+  for (const [row, col] of spreadTargets) {
+    newGrid[row][col].corruption = 1;
   }
   
   return {
     grid: newGrid,
-    corruptionAdded,
+    corruptionAdded: 1 + spreadTargets.length,
     eventTriggered: false,
   };
 }
@@ -195,43 +216,39 @@ export function distortInputsInCorruptedZone(
   };
 }
 
+export function checkCorruptionThresholdEvent(
+  previousCount: number,
+  currentCount: number,
+  upgradeEffects?: string[]
+): { eventType: CorruptionEventType | 'lose' | null; threshold: number } {
+  const thresholds = getCorruptionThresholds();
+  
+  for (const threshold of thresholds) {
+    if (previousCount < threshold && currentCount >= threshold) {
+      const eventType = getCorruptionEventAtThreshold(threshold);
+      
+      const flowStateImmunity = upgradeEffects?.includes('jester_flow_state') || false;
+      if (eventType === 'candidate_chaos' && flowStateImmunity) {
+        console.log('[FlowState] Candidate Chaos blocked by Jester immunity at threshold', threshold);
+        return { eventType: null, threshold };
+      }
+      
+      console.log(`[Corruption Threshold] Reached ${threshold} - triggering ${eventType}`);
+      return { eventType, threshold };
+    }
+  }
+  
+  return { eventType: null, threshold: 0 };
+}
+
 export function triggerCorruptionEvent(
   grid: GameGrid,
-  totalCorruption: number,
-  threshold: number,
+  eventType: CorruptionEventType,
   mistakeRow?: number,
-  mistakeCol?: number,
-  upgradeEffects?: string[]
-): { grid: GameGrid; eventType: CorruptionEventType | null; lockedBox?: number } {
-  const corruptionPercent = totalCorruption / threshold;
-  
-  if (Math.random() > corruptionPercent) {
-    return { grid, eventType: null };
-  }
-  
-  const flowStateImmunity = upgradeEffects?.includes('jester_flow_state') || false;
-  
-  let events: CorruptionEventType[] = [
-    'cascade_fog',
-    'candidate_chaos',
-    'region_inversion',
-    'phantom_lock',
-    'cell_lock',
-  ];
-  
-  if (flowStateImmunity) {
-    events = events.filter(e => e !== 'candidate_chaos');
-    console.log('[FlowState] Candidate Chaos blocked by Jester immunity');
-  }
-  
-  if (events.length === 0) {
-    return { grid, eventType: null };
-  }
-  
-  const eventType = events[Math.floor(Math.random() * events.length)];
+  mistakeCol?: number
+): { grid: GameGrid; lockedBox?: number } {
   const result = applyCorruptionEvent(grid, eventType, mistakeRow, mistakeCol);
-  
-  return { grid: result.grid, eventType, lockedBox: result.lockedBox };
+  return { grid: result.grid, lockedBox: result.lockedBox };
 }
 
 function applyCorruptionEvent(
@@ -293,17 +310,9 @@ function applyCorruptionEvent(
       };
       
     case 'cell_lock': {
-      let boxToLock: number;
+      const boxToLock = findBoxWithMostCorruption(grid);
       
-      if (mistakeRow !== undefined && mistakeCol !== undefined) {
-        const boxRow = Math.floor(mistakeRow / 3);
-        const boxCol = Math.floor(mistakeCol / 3);
-        boxToLock = boxRow * 3 + boxCol;
-      } else {
-        boxToLock = Math.floor(Math.random() * 9);
-      }
-      
-      console.log(`[CellLock] Box ${boxToLock} locked by corruption event`);
+      console.log(`[CellLock] Box ${boxToLock} locked by corruption event (most corrupted)`);
       
       return {
         grid,
@@ -317,10 +326,10 @@ function applyCorruptionEvent(
 }
 
 export function calculateShopInflation(
-  corruption: number,
+  corruptionCount: number,
   basePrice: number
 ): number {
-  const inflationRate = Math.min(corruption * 0.02, 0.5);
+  const inflationRate = corruptionCount / 100;
   return Math.floor(basePrice * (1 + inflationRate));
 }
 
@@ -329,7 +338,45 @@ export function shouldDegradeUpgrade(corruption: number): boolean {
 }
 
 export function getTotalCorruption(grid: GameGrid): number {
-  return grid.flat().reduce((sum, cell) => sum + cell.corruption, 0);
+  let count = 0;
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      if (grid[i][j].corruption > 0) {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+export function getCorruptedCellsInBox(grid: GameGrid, boxIndex: number): number {
+  const boxRow = Math.floor(boxIndex / 3) * 3;
+  const boxCol = (boxIndex % 3) * 3;
+  
+  let count = 0;
+  for (let i = boxRow; i < boxRow + 3; i++) {
+    for (let j = boxCol; j < boxCol + 3; j++) {
+      if (grid[i][j].corruption > 0) {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+export function findBoxWithMostCorruption(grid: GameGrid): number {
+  let maxCorruption = 0;
+  let maxBox = 0;
+  
+  for (let boxIndex = 0; boxIndex < 9; boxIndex++) {
+    const corruption = getCorruptedCellsInBox(grid, boxIndex);
+    if (corruption > maxCorruption) {
+      maxCorruption = corruption;
+      maxBox = boxIndex;
+    }
+  }
+  
+  return maxBox;
 }
 
 export function cleanseCells(
@@ -346,9 +393,10 @@ export function cleanseCells(
     }
   }
   
-  corruptedCells.sort((a, b) => 
-    grid[b[0]][b[1]].corruption - grid[a[0]][a[1]].corruption
-  );
+  for (let i = corruptedCells.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [corruptedCells[i], corruptedCells[j]] = [corruptedCells[j], corruptedCells[i]];
+  }
   
   const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
   
@@ -362,4 +410,53 @@ export function cleanseCells(
   }
   
   return { grid: newGrid, cellsCleansed: cleansedCount };
+}
+
+export function eraseAllCandidates(grid: GameGrid): GameGrid {
+  return grid.map(row => 
+    row.map(cell => ({
+      ...cell,
+      candidates: [],
+    }))
+  );
+}
+
+export function applyFogToRandomBoxes(grid: GameGrid, boxCount: number): GameGrid {
+  const availableBoxes = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  const boxesToFog: number[] = [];
+  
+  for (let i = 0; i < Math.min(boxCount, availableBoxes.length); i++) {
+    const randomIndex = Math.floor(Math.random() * availableBoxes.length);
+    boxesToFog.push(availableBoxes[randomIndex]);
+    availableBoxes.splice(randomIndex, 1);
+  }
+  
+  const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
+  
+  for (const boxIndex of boxesToFog) {
+    const boxRow = Math.floor(boxIndex / 3) * 3;
+    const boxCol = (boxIndex % 3) * 3;
+    
+    for (let i = boxRow; i < boxRow + 3; i++) {
+      for (let j = boxCol; j < boxCol + 3; j++) {
+        newGrid[i][j].isFogged = true;
+      }
+    }
+  }
+  
+  return newGrid;
+}
+
+export function lockMultipleBoxes(grid: GameGrid, existingLockedBoxes: number[], count: number): number[] {
+  const availableBoxes = [0, 1, 2, 3, 4, 5, 6, 7, 8].filter(
+    box => !existingLockedBoxes.includes(box)
+  );
+  
+  availableBoxes.sort((a, b) => 
+    getCorruptedCellsInBox(grid, b) - getCorruptedCellsInBox(grid, a)
+  );
+  
+  const boxesToLock = availableBoxes.slice(0, Math.min(count, availableBoxes.length));
+  
+  return [...existingLockedBoxes, ...boxesToLock];
 }

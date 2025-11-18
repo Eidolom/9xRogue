@@ -240,13 +240,13 @@ export default function PuzzleScreen() {
 
   const mistakeBar = gameState.mistakes / gameState.maxMistakes;
   const progressBar = gameState.completedCells / gameState.totalCells;
-  const corruptionPercent = (gameState.corruption / 100);
+  const corruptionBar = gameState.corruption / 50;
 
   return (
     <View style={styles.container}>
       <CRTBackground 
-        showVignette={corruptionPercent > 0.4}
-        vignetteIntensity={Math.min(corruptionPercent * 0.5, 0.4)}
+        showVignette={corruptionBar > 0.4}
+        vignetteIntensity={Math.min(corruptionBar * 0.5, 0.4)}
       />
 
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
@@ -332,21 +332,22 @@ export default function PuzzleScreen() {
           </Text>
         </View>
 
-        {gameState.corruption > 0 && (
-          <Animated.View
-            style={[
-              styles.corruptionWarning,
-              {
-                opacity: corruptionAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.6, 1],
-                }),
-              },
-            ]}
-          >
-            <Text style={styles.corruptionText}>▓ CRP: {gameState.corruption}% ▓</Text>
-          </Animated.View>
-        )}
+        <Animated.View
+          style={[
+            styles.corruptionContainer,
+            {
+              opacity: corruptionAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.6, 1],
+              }),
+            },
+          ]}
+        >
+          <Text style={styles.statLabel}>CRP: {gameState.corruption}/50</Text>
+          <View style={styles.barContainer}>
+            <View style={[styles.barFill, { width: `${corruptionBar * 100}%`, backgroundColor: COLORS.accent.magenta }]} />
+          </View>
+        </Animated.View>
       </View>
 
       <View style={styles.gameArea}>
@@ -450,21 +451,13 @@ const styles = StyleSheet.create({
   barFill: {
     height: '100%',
   },
-  corruptionWarning: {
-    backgroundColor: 'rgba(196, 76, 196, 0.2)',
+  corruptionContainer: {
+    backgroundColor: COLORS.background.primary,
     paddingHorizontal: 8,
     paddingVertical: 5,
     marginTop: 6,
     borderWidth: BORDER.medium,
     borderColor: COLORS.accent.magenta,
-  },
-  corruptionText: {
-    color: COLORS.accent.magenta,
-    fontSize: 10,
-    fontWeight: 'bold' as const,
-    textAlign: 'center' as const,
-    fontFamily: (Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) || 'monospace') as 'monospace',
-    letterSpacing: 1,
   },
   gameArea: {
     flex: 1,

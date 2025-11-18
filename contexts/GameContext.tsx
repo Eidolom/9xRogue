@@ -34,6 +34,10 @@ import {
   getTotalCorruption,
   getCorruptionThreshold,
   cleanseCells,
+  checkCorruptionThresholdEvent,
+  eraseAllCandidates,
+  applyFogToRandomBoxes,
+  lockMultipleBoxes,
 } from '@/utils/corruption';
 import { Achievement, GameStats } from '@/types/achievements';
 import { ACHIEVEMENTS } from '@/constants/achievements';
@@ -194,6 +198,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       charges: 1,
       maxCharges: 1,
     };
+    const initialCorruption = getTotalCorruption(grid);
     return {
       floor: 1,
       maxFloors: 9,
@@ -202,7 +207,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       selectedCell: null,
       mistakes: 0,
       maxMistakes: baseMaxMistakes,
-      corruption: 0,
+      corruption: initialCorruption,
       currency: 100,
       entropyDust: 0,
       upgrades: [starterConsumable],
@@ -306,7 +311,6 @@ export const [GameContext, useGame] = createContextHook(() => {
 
     let newPendingValidations = [...gameState.pendingValidations, move];
     let newMistakes = gameState.mistakes;
-    let newCorruption = gameState.corruption;
     let newCurrency = gameState.currency;
     let upgradeTriggered = false;
     let newAmbiguityZones = gameState.ambiguityZones;
@@ -318,12 +322,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       newGrid = validationResult.grid;
       
       let mistakesToAdd = validationResult.mistakes;
-      let corruptionToAdd = validationResult.corruption;
-      
-      const corruptionShield = gameState.upgrades.find(u => u.effect === 'corruption_resist');
-      if (corruptionShield) {
-        corruptionToAdd = Math.floor(corruptionToAdd * 0.5);
-      }
       
       const corruptedCore = gameState.upgrades.find(u => u.effect === 'corrupt_gold');
       if (corruptedCore && mistakesToAdd > 0) {
@@ -348,7 +346,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       }
       
       newMistakes += mistakesToAdd;
-      newCorruption += corruptionToAdd;
       
       if (validationResult.mistakes > 0) {
         setRunMistakes(prev => prev + validationResult.mistakes);
@@ -356,19 +353,17 @@ export const [GameContext, useGame] = createContextHook(() => {
         const noSpread = gameState.upgrades.find(u => u.effect === 'no_spread');
         const hazmatSuit = gameState.upgrades.find(u => u.effect === 'first_mistake_safe');
         const isFirstMistakeInPuzzle = gameState.mistakes === 0 && hazmatSuit;
-        const corruptedCore = gameState.upgrades.find(u => u.effect === 'corrupt_gold');
         
         if (!noSpread && !isFirstMistakeInPuzzle) {
           for (const validatedMove of toValidate) {
             const isCorrect = gameState.solution[validatedMove.row][validatedMove.col] === validatedMove.value;
             if (!isCorrect) {
-              let spreadMultiplier = 1;
-              if (corruptedCore) {
-                spreadMultiplier = 2;
-              }
-              const spreadResult = spreadCorruption(newGrid, validatedMove.row, validatedMove.col, mistakesToAdd * spreadMultiplier, newCorruption);
+              const previousCorruption = getTotalCorruption(newGrid);
+              const spreadResult = spreadCorruption(newGrid, validatedMove.row, validatedMove.col);
               newGrid = spreadResult.grid;
-              newCorruption += spreadResult.corruptionAdded;
+              
+              const currentCorruption = getTotalCorruption(newGrid);
+              console.log(`[Corruption] Spread from (${validatedMove.row},${validatedMove.col}). Count: ${previousCorruption} -> ${currentCorruption}`);
             }
           }
         } else if (isFirstMistakeInPuzzle) {
@@ -382,47 +377,74 @@ export const [GameContext, useGame] = createContextHook(() => {
     
     let newLockedBoxes = [...gameState.lockedBoxes];
     
-    const totalCorruption = getTotalCorruption(newGrid) + newCorruption;
-    const corruptionThreshold = getCorruptionThreshold(gameState.floor);
-    const eventResult = triggerCorruptionEvent(newGrid, totalCorruption, corruptionThreshold, row, col, upgradeEffects);
-    if (eventResult.eventType) {
-      newGrid = eventResult.grid;
-      console.log(`Corruption event triggered: ${eventResult.eventType}`);
-      if (eventResult.lockedBox !== undefined && !newLockedBoxes.includes(eventResult.lockedBox)) {
-        newLockedBoxes.push(eventResult.lockedBox);
-        console.log(`[CellLock] Box ${eventResult.lockedBox} has been locked!`);
-      }
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    const previousCorruptionCount = gameState.corruption;
+    const currentCorruptionCount = getTotalCorruption(newGrid);
+    
+    const thresholdEvent = checkCorruptionThresholdEvent(
+      previousCorruptionCount,
+      currentCorruptionCount,
+      upgradeEffects
+    );
+    
+    if (thresholdEvent.eventType) {
+      if (thresholdEvent.eventType === 'lose') {
+        console.log('[Corruption] Reached 50 - Game Over!');
+        setGameState(prev => ({
+          ...prev,
+          gameOver: true,
+        }));
+        setPhase('defeat');
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        }
+        return;
+      } else if (thresholdEvent.eventType === 'candidate_chaos') {
+        if (thresholdEvent.threshold === 10) {
+          console.log('[Corruption Threshold 10] Erasing all pencil marks');
+          newGrid = eraseAllCandidates(newGrid);
+        } else if (thresholdEvent.threshold === 30) {
+          console.log('[Corruption Threshold 30] Erasing all pencil marks + fogging 3 boxes');
+          newGrid = eraseAllCandidates(newGrid);
+          newGrid = applyFogToRandomBoxes(newGrid, 3);
+        }
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
+      } else if (thresholdEvent.eventType === 'cell_lock') {
+        if (thresholdEvent.threshold === 20) {
+          console.log('[Corruption Threshold 20] Locking 1 box');
+          const eventResult = triggerCorruptionEvent(newGrid, 'cell_lock', row, col);
+          if (eventResult.lockedBox !== undefined && !newLockedBoxes.includes(eventResult.lockedBox)) {
+            newLockedBoxes.push(eventResult.lockedBox);
+          }
+        } else if (thresholdEvent.threshold === 40) {
+          console.log('[Corruption Threshold 40] Locking 3 boxes');
+          newLockedBoxes = lockMultipleBoxes(newGrid, newLockedBoxes, 3);
+        }
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
       }
     }
     
     const currentCell = newGrid[row][col];
     if (currentCell.isAmbiguous && !suppressValidation) {
       const isCorrect = gameState.solution[row][col] === num;
-      const ambiguityCorruption = calculateAmbiguityCorruption(currentCell.ambiguityLevel, isCorrect);
       
       if (!isCorrect) {
         const divergenceCharm = gameState.upgrades.find(u => u.effect === 'ambiguity_contain');
-        const insightMarker = currentCell.ambiguityMarked;
         
         if (divergenceCharm) {
           newGrid = newGrid.map((r, i) => 
             r.map((c, j) => {
               if (i === row && j === col) {
-                return { ...c, corruption: c.corruption + 1 };
+                return { ...c, corruption: 1 };
               }
               return c;
             })
           );
         } else {
           newGrid = spreadAmbiguityCorruption(newGrid, row, col, currentCell.ambiguityLevel);
-        }
-        
-        if (insightMarker) {
-          newCorruption += Math.floor(ambiguityCorruption * 0.5);
-        } else {
-          newCorruption += ambiguityCorruption;
         }
       }
       
@@ -449,6 +471,7 @@ export const [GameContext, useGame] = createContextHook(() => {
         console.log(`[NumberUpgrade] Found ${numberUpgrades.length} upgrades for number ${num}`);
         
         for (const upgrade of numberUpgrades) {
+          const currentCorruption = getTotalCorruption(newGrid);
           const result = applyNumberUpgradeEffect(
             upgrade,
             newGrid,
@@ -456,7 +479,7 @@ export const [GameContext, useGame] = createContextHook(() => {
             row,
             col,
             num,
-            newCorruption,
+            currentCorruption,
             newCurrency,
             gameState.upgrades
           );
@@ -464,9 +487,6 @@ export const [GameContext, useGame] = createContextHook(() => {
           newGrid = result.grid;
           if (result.currency !== undefined) {
             newCurrency = result.currency;
-          }
-          if (result.corruption !== undefined) {
-            newCorruption = result.corruption;
           }
           if (result.inflationReduction !== undefined) {
             console.log(`[NumberUpgrade] Inflation reduction: ${result.inflationReduction}%`);
@@ -487,6 +507,7 @@ export const [GameContext, useGame] = createContextHook(() => {
     }
 
     const newCompletedCells = countFilledCells(newGrid.map(row => row.map(cell => cell.value)));
+    const finalCorruption = getTotalCorruption(newGrid);
     
     const puzzleGrid = newGrid.map(row => row.map(cell => cell.value));
     const isComplete = checkPuzzleComplete(puzzleGrid, gameState.solution);
@@ -496,7 +517,6 @@ export const [GameContext, useGame] = createContextHook(() => {
       const validationResult = processDelayedValidation(newGrid, gameState.solution, newPendingValidations);
       newGrid = validationResult.grid;
       newMistakes += validationResult.mistakes;
-      newCorruption += validationResult.corruption;
       newPendingValidations = [];
       
       if (Platform.OS !== 'web') {
@@ -513,7 +533,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       ...prev,
       grid: newGrid,
       mistakes: newMistakes,
-      corruption: newCorruption,
+      corruption: finalCorruption,
       currency: newCurrency,
       upgrades: newUpgrades,
       completedCells: newCompletedCells,
@@ -755,6 +775,8 @@ export const [GameContext, useGame] = createContextHook(() => {
     grid = rogueResult.grid;
     startCurrency = rogueResult.currency;
     console.log('[RogueUpgrades] Applied at floor start. New currency:', startCurrency);
+    
+    const initialCorruption = getTotalCorruption(grid);
 
     setGameState(prev => ({
       ...prev,
@@ -764,7 +786,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       selectedCell: null,
       mistakes: 0,
       maxMistakes: baseMaxMistakes,
-      corruption: 0,
+      corruption: initialCorruption,
       currency: startCurrency,
       isComplete: false,
       gameOver: false,
@@ -812,6 +834,8 @@ export const [GameContext, useGame] = createContextHook(() => {
     setRunMistakes(0);
     setFloorStartTime(Date.now());
     
+    const initialCorruption = getTotalCorruption(grid);
+    
     setGameState({
       floor: 1,
       maxFloors: 9,
@@ -820,7 +844,7 @@ export const [GameContext, useGame] = createContextHook(() => {
       selectedCell: null,
       mistakes: 0,
       maxMistakes: 3,
-      corruption: 0,
+      corruption: initialCorruption,
       currency: 100,
       entropyDust: 0,
       upgrades: [starterConsumable],
@@ -863,7 +887,6 @@ export const [GameContext, useGame] = createContextHook(() => {
     }
 
     let newGrid = gameState.grid.map(row => row.map(cell => ({ ...cell })));
-    let newCorruption = gameState.corruption;
     let newCurrency = gameState.currency;
 
     switch (consumable.effect) {
@@ -872,7 +895,6 @@ export const [GameContext, useGame] = createContextHook(() => {
         const cellsToCleanse = consumable.maxCharges || 3;
         const cleanseResult = cleanseCells(newGrid, cellsToCleanse);
         newGrid = cleanseResult.grid;
-        newCorruption = Math.max(0, newCorruption - 10);
         console.log(`[Consumable] Cleansed ${cleanseResult.cellsCleansed} cells`);
         break;
       }
@@ -1027,11 +1049,13 @@ export const [GameContext, useGame] = createContextHook(() => {
       }
       return true;
     });
+    
+    const finalCorruption = getTotalCorruption(newGrid);
 
     setGameState(prev => ({
       ...prev,
       grid: newGrid,
-      corruption: newCorruption,
+      corruption: finalCorruption,
       currency: newCurrency,
       upgrades: filteredUpgrades,
       completedCells: countFilledCells(newGrid.map(row => row.map(cell => cell.value))),
