@@ -115,4 +115,4 @@ export interface NumberUpgradeState {
   chargesRemaining?: number;
 }
 
-export type GamePhase = 'title' | 'puzzle' | 'shop' | 'victory' | 'defeat' | 'progress';
+export type GamePhase = 'title' | 'puzzle' | 'shop' | 'grimoire' | 'victory' | 'defeat' | 'progress';

@@ -4,6 +4,7 @@ import { useGame } from '@/contexts/GameContext';
 import TitleScreen from '@/components/TitleScreen';
 import PuzzleScreen from '@/components/PuzzleScreen';
 import ShopScreen from '@/components/ShopScreen';
+import GrimoireScreen from '@/components/GrimoireScreen';
 import VictoryScreen from '@/components/VictoryScreen';
 import DefeatScreen from '@/components/DefeatScreen';
 import ProgressScreen from '@/components/ProgressScreen';
@@ -17,6 +18,7 @@ export default function GameScreen() {
       {phase === 'title' && <TitleScreen onStart={startGame} onProgress={showProgress} />}
       {phase === 'puzzle' && <PuzzleScreen />}
       {phase === 'shop' && <ShopScreen />}
+      {phase === 'grimoire' && <GrimoireScreen />}
       {phase === 'victory' && <VictoryScreen />}
       {phase === 'defeat' && <DefeatScreen />}
       {phase === 'progress' && <ProgressScreen stats={stats} achievements={achievements} onBack={backToTitle} />}

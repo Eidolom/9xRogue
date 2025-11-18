@@ -21,7 +21,7 @@ import { COLORS, BORDER } from '@/constants/theme';
 
 export default function ShopScreen() {
   const insets = useSafeAreaInsets();
-  const { gameState, nextFloor, purchaseUpgrade } = useGame();
+  const { gameState, purchaseUpgrade, openGrimoire } = useGame();
   const [shopSession, setShopSession] = useState<ShopSession | null>(null);
   const [selectedOffer, setSelectedOffer] = useState<ShopOffer | null>(null);
   const [rerolling, setRerolling] = useState(false);
@@ -205,9 +205,9 @@ export default function ShopScreen() {
     setSelectedOffer(null);
   };
 
-  const handleSkip = () => {
+  const handleVisitGrimoire = () => {
     emitShopAnalytics('shop_skip', { floor: gameState.floor });
-    nextFloor();
+    openGrimoire();
   };
 
   const getRarityColor = (rarity?: string): string => {
@@ -419,10 +419,10 @@ export default function ShopScreen() {
 
           <TouchableOpacity
             style={styles.exitButton}
-            onPress={handleSkip}
+            onPress={handleVisitGrimoire}
             activeOpacity={0.7}
           >
-            <Text style={styles.exitButtonText}>EXIT ▶</Text>
+            <Text style={styles.exitButtonText}>GRIMOIRE ▶</Text>
           </TouchableOpacity>
         </View>
       </View>
