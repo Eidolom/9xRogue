@@ -48,13 +48,7 @@ export function applyRogueUpgradesAtStart(
 
     switch (upgrade.effect) {
         case 'scout_omniscience': {
-        const allOnes = findEmptyCellsForNumber(newGrid, solution, 1);
-        for (const [row, col] of allOnes) {
-          newGrid[row][col].candidates = [1];
-          newGrid[row][col].isFogged = false;
-          newGrid[row][col].isHidden = false;
-        }
-        console.log('[Scout] Revealed all 1s via Omniscience');
+        console.log('[Scout] Omniscience active - reveals fog on placement');
         break;
       }
 
@@ -130,15 +124,26 @@ export function applyNumberUpgradeEffect(
         const [nRow, nCol] = nakedSingle;
         const value = solution[nRow][nCol];
         if (value !== null) {
+          const hasNumberUpgrade = allUpgrades?.some(
+            u => u.type === 'number' && u.number === value
+          );
           result.grid = grid.map((r, i) =>
             r.map((c, j) => {
               if (i === nRow && j === nCol) {
-                return { ...c, candidates: [value] };
+                if (hasNumberUpgrade) {
+                  return { ...c, candidates: [value] };
+                } else {
+                  return { ...c, isFogged: false };
+                }
               }
               return c;
             })
           );
-          console.log('[Scout L1] Highlighted naked single at', nRow, nCol);
+          if (hasNumberUpgrade) {
+            console.log('[Scout L1] Highlighted naked single at', nRow, nCol, 'with pen mark');
+          } else {
+            console.log('[Scout L1] Found naked single at', nRow, nCol, '(no pen mark - upgrade not owned)');
+          }
         }
       } else {
         console.log('[Scout L1] No naked single found');
@@ -152,10 +157,17 @@ export function applyNumberUpgradeEffect(
         const [nRow, nCol] = nakedSingle;
         const value = solution[nRow][nCol];
         if (value !== null) {
+          const hasNumberUpgrade = allUpgrades?.some(
+            u => u.type === 'number' && u.number === value
+          );
           result.grid = grid.map((r, i) =>
             r.map((c, j) => {
               if (i === nRow && j === nCol) {
-                return { ...c, candidates: [value] };
+                if (hasNumberUpgrade) {
+                  return { ...c, candidates: [value] };
+                } else {
+                  return { ...c, isFogged: false };
+                }
               }
               return c;
             })
@@ -175,15 +187,26 @@ export function applyNumberUpgradeEffect(
         const [hRow, hCol] = hiddenSingle;
         const value = solution[hRow][hCol];
         if (value !== null) {
+          const hasNumberUpgrade = allUpgrades?.some(
+            u => u.type === 'number' && u.number === value
+          );
           result.grid = grid.map((r, i) =>
             r.map((c, j) => {
               if (i === hRow && j === hCol) {
-                return { ...c, candidates: [value] };
+                if (hasNumberUpgrade) {
+                  return { ...c, candidates: [value] };
+                } else {
+                  return { ...c, isFogged: false };
+                }
               }
               return c;
             })
           );
-          console.log('[Scout L3] Highlighted hidden single at', hRow, hCol);
+          if (hasNumberUpgrade) {
+            console.log('[Scout L3] Highlighted hidden single at', hRow, hCol, 'with pen mark');
+          } else {
+            console.log('[Scout L3] Found hidden single at', hRow, hCol, '(no pen mark - upgrade not owned)');
+          }
         }
       } else {
         console.log('[Scout L3] No hidden single found');
@@ -245,14 +268,6 @@ export function applyNumberUpgradeEffect(
     case 'scout_omniscience': {
       const adjacentCells = getAdjacentCells(row, col);
       result.grid = clearFogInCells(grid, adjacentCells);
-      result.grid = result.grid.map((r, i) =>
-        r.map((c, j) => {
-          if (adjacentCells.some(([aRow, aCol]) => aRow === i && aCol === j)) {
-            return { ...c, candidates: [] };
-          }
-          return c;
-        })
-      );
       console.log('[Scout ROGUE] Omniscience - cleared fog in adjacent cells');
       break;
     }
@@ -401,15 +416,26 @@ export function applyNumberUpgradeEffect(
         const [hRow, hCol] = hiddenSingle;
         const value = solution[hRow][hCol];
         if (value !== null) {
+          const hasNumberUpgrade = allUpgrades?.some(
+            u => u.type === 'number' && u.number === value
+          );
           result.grid = grid.map((r, i) =>
             r.map((c, j) => {
               if (i === hRow && j === hCol) {
-                return { ...c, candidates: [value] };
+                if (hasNumberUpgrade) {
+                  return { ...c, candidates: [value] };
+                } else {
+                  return { ...c, isFogged: false };
+                }
               }
               return c;
             })
           );
-          console.log('[Sniper L2] Highlighted hidden single');
+          if (hasNumberUpgrade) {
+            console.log('[Sniper L2] Highlighted hidden single with pen mark');
+          } else {
+            console.log('[Sniper L2] Found hidden single (no pen mark - upgrade not owned)');
+          }
         }
       }
       break;
