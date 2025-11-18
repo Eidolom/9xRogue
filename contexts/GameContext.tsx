@@ -620,6 +620,18 @@ export const [GameContext, useGame] = createContextHook(() => {
     
     if (cell.isFixed || cell.value !== null) return;
 
+    const hasNumberUpgrade = gameState.upgrades.some(
+      u => u.type === 'number' && u.number === num
+    );
+    
+    if (!hasNumberUpgrade) {
+      console.log(`[PencilMark] Cannot place candidate ${num} - no upgrade owned`);
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+      return;
+    }
+
     if (Platform.OS !== 'web') {
       Haptics.selectionAsync();
     }
