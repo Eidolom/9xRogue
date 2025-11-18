@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.accent.amber,
     letterSpacing: 3,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   statBar: {
     flexDirection: 'row' as const,
@@ -558,7 +558,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   corruptionWarning: {
     backgroundColor: COLORS.background.primary,
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.accent.red,
     fontWeight: 'bold' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 1,
   },
   scrollView: {
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold' as const,
     color: COLORS.primary.cyan,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 4,
   },
   card: {
@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 'bold' as const,
     color: '#000000',
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 1,
   },
   levelBadge: {
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 'bold' as const,
     color: '#000000',
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 1,
   },
   iconBadge: {
@@ -659,12 +659,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
     marginBottom: 4,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   cardType: {
     fontSize: 10,
     color: COLORS.text.secondary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 1,
   },
   cardFooter: {
@@ -682,13 +682,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.text.muted,
     textDecorationLine: 'line-through' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   costFinal: {
     fontSize: 12,
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   cardButton: {
     paddingVertical: 10,
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
   cardButtonText: {
     fontSize: 12,
     fontWeight: 'bold' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 2,
   },
   footer: {
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold' as const,
     color: COLORS.primary.cyan,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 2,
   },
   actionButtonTextDisabled: {
@@ -750,7 +750,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold' as const,
     color: COLORS.primary.cyan,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 2,
   },
   modalOverlay: {
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold' as const,
     color: COLORS.accent.red,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   modalRarityBadge: {
     alignSelf: 'flex-start' as const,
@@ -794,7 +794,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold' as const,
     color: '#000000',
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 1,
   },
   modalLevelBadge: {
@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold' as const,
     color: '#000000',
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 1,
   },
   modalTitle: {
@@ -817,12 +817,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
     marginBottom: 8,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   modalType: {
     fontSize: 11,
     color: COLORS.text.secondary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 1,
     marginBottom: 12,
   },
@@ -836,7 +836,7 @@ const styles = StyleSheet.create({
     color: COLORS.text.secondary,
     lineHeight: 20,
     marginBottom: 16,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   modalDependency: {
     flexDirection: 'row' as const,
@@ -852,7 +852,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.accent.amber,
     flex: 1,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   modalWarning: {
     flexDirection: 'row' as const,
@@ -868,7 +868,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.accent.red,
     flex: 1,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   modalCosts: {
     gap: 8,
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
   modalCostLabel: {
     fontSize: 12,
     color: COLORS.text.secondary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   modalCostValues: {
     flexDirection: 'row' as const,
@@ -894,13 +894,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: COLORS.text.muted,
     textDecorationLine: 'line-through' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   modalCostValue: {
     fontSize: 14,
     fontWeight: 'bold' as const,
     color: COLORS.text.primary,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
   },
   modalBuyButton: {
     paddingVertical: 14,
@@ -910,7 +910,7 @@ const styles = StyleSheet.create({
   modalBuyText: {
     fontSize: 14,
     fontWeight: 'bold' as const,
-    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }) as const,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
     letterSpacing: 2,
   },
 });

@@ -1231,6 +1231,11 @@ export const [GameContext, useGame] = createContextHook(() => {
     }
   }, [gameState]);
 
+  const openGrimoire = useCallback(() => {
+    console.log('[Shop] Opening Grimoire');
+    setPhase('grimoire');
+  }, []);
+
   return {
     phase,
     gameState,
@@ -1251,6 +1256,7 @@ export const [GameContext, useGame] = createContextHook(() => {
     useConsumable,
     clearPuzzle,
     solvePuzzle,
+    openGrimoire,
     getFloorDescription: () => getDescriptionForFloor(gameState.floor),
   };
 });
