@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X, Zap, Sparkles, Package } from 'lucide-react-native';
+import { X, Sparkles, Package } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useGame } from '@/contexts/GameContext';
 import { Upgrade } from '@/types/game';
@@ -21,7 +21,6 @@ export default function InventoryScreen({ visible, onClose }: InventoryScreenPro
   const { gameState, useConsumable } = useGame();
   const [selectedUpgrade, setSelectedUpgrade] = useState<Upgrade | null>(null);
 
-  const numberUpgrades = gameState.upgrades.filter(u => u.type === 'number');
   const passiveUpgrades = gameState.upgrades.filter(u => u.type === 'passive');
   const consumables = gameState.upgrades.filter(u => u.type === 'consumable');
 
@@ -126,18 +125,6 @@ export default function InventoryScreen({ visible, onClose }: InventoryScreenPro
           contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 16 }]}
           showsVerticalScrollIndicator={false}
         >
-          {numberUpgrades.length > 0 && (
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Zap size={16} color={COLORS.primary.cyan} />
-                <Text style={styles.sectionTitle}>NUMBER UPGRADES ({numberUpgrades.length})</Text>
-              </View>
-              <View style={styles.cardGrid}>
-                {numberUpgrades.map((upgrade, index) => renderUpgradeCard(upgrade, index))}
-              </View>
-            </View>
-          )}
-
           {passiveUpgrades.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
@@ -162,7 +149,7 @@ export default function InventoryScreen({ visible, onClose }: InventoryScreenPro
             </View>
           )}
 
-          {gameState.upgrades.length === 0 && (
+          {passiveUpgrades.length === 0 && consumables.length === 0 && (
             <View style={styles.emptyState}>
               <Package size={48} color={COLORS.text.muted} />
               <Text style={styles.emptyText}>▓ INVENTORY EMPTY ▓</Text>
