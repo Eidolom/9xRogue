@@ -476,10 +476,11 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '100%',
     maxWidth: 400,
-    maxHeight: '80%',
+    maxHeight: '85%',
     borderWidth: BORDER.thick,
     borderColor: COLORS.primary.cyan,
     position: 'relative',
+    overflow: 'hidden',
   },
   modalClose: {
     position: 'absolute',
@@ -514,7 +515,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalScrollView: {
-    maxHeight: 400,
+    flex: 1,
   },
   upgradeRow: {
     borderWidth: BORDER.medium,
