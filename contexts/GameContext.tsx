@@ -525,16 +525,74 @@ export const [GameContext, useGame] = createContextHook(() => {
           if (result.maxMistakesBonus !== undefined) {
             console.log(`[NumberUpgrade] Max mistakes bonus: +${result.maxMistakesBonus}`);
           }
-          if (result.shieldChargeBonus !== undefined && currentMaxShields > 0) {
-            const newCharges = Math.min(newShieldCharges + result.shieldChargeBonus, currentMaxShields);
-            newShieldCharges = newCharges;
-            console.log(`[Fortress] Gained ${result.shieldChargeBonus} Shield Charge. Total: ${newShieldCharges}/${currentMaxShields}`);
-          }
           upgradeTriggered = true;
           console.log(`[NumberUpgrade] Triggered: ${upgrade.effect}`);
         }
       } else {
         console.log(`[NumberUpgrade] No upgrades found for number ${num} - number does nothing`);
+      }
+      
+      if (num === 5) {
+        const catalystUpgrades = gameState.upgrades.filter(
+          u => u.number === 5 && u.type === 'number'
+        );
+        
+        const hasCatalystL1 = catalystUpgrades.some(u => u.effect === 'catalyst_ignite');
+        const hasCatalystL2 = catalystUpgrades.some(u => u.effect === 'catalyst_synergy');
+        const hasCatalystL3 = catalystUpgrades.some(u => u.effect === 'catalyst_potency');
+        const hasCatalystL4 = catalystUpgrades.some(u => u.effect === 'catalyst_catalyze');
+        const hasCatalystL5 = catalystUpgrades.some(u => u.effect === 'catalyst_fusion');
+        
+        if (hasCatalystL1 || hasCatalystL2 || hasCatalystL3 || hasCatalystL4 || hasCatalystL5) {
+          console.log('[Catalyst] Triggering other number abilities');
+          
+          const otherNumberUpgrades = gameState.upgrades.filter(
+            u => u.type === 'number' && u.number !== 5
+          );
+          
+          for (const otherUpgrade of otherNumberUpgrades) {
+            const shouldTrigger = (() => {
+              if (hasCatalystL5) {
+                return true;
+              }
+              if (hasCatalystL4 && (otherUpgrade.effect.includes('_l1') || otherUpgrade.effect.includes('_l3'))) {
+                return true;
+              }
+              if (hasCatalystL3 && otherUpgrade.effect.includes('_l1')) {
+                return true;
+              }
+              if (hasCatalystL2 && otherUpgrade.effect.includes('_l1')) {
+                return true;
+              }
+              if (hasCatalystL1 && otherUpgrade.effect.includes('_l1')) {
+                return Math.random() < (1 / otherNumberUpgrades.length);
+              }
+              return false;
+            })();
+            
+            if (shouldTrigger) {
+              console.log(`[Catalyst] Triggering ${otherUpgrade.name}`);
+              const currentCorruption = getTotalCorruption(newGrid);
+              const result = applyNumberUpgradeEffect(
+                otherUpgrade,
+                newGrid,
+                gameState.solution,
+                row,
+                col,
+                otherUpgrade.number!,
+                currentCorruption,
+                newCurrency,
+                gameState.upgrades
+              );
+              
+              newGrid = result.grid;
+              if (result.currency !== undefined) {
+                newCurrency = result.currency;
+              }
+              upgradeTriggered = true;
+            }
+          }
+        }
       }
     }
     

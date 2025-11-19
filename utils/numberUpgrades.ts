@@ -1,6 +1,4 @@
 import { GameGrid, Grid, Upgrade } from '@/types/game';
-import { cleanseCells } from './corruption';
-import { getConnectedCells } from './corruption';
 
 export interface UpgradeEffectResult {
   grid: GameGrid;
@@ -9,17 +7,18 @@ export interface UpgradeEffectResult {
   message?: string;
   chargesUsed?: number;
   shieldActive?: boolean;
-  shieldExpiry?: number;
   maxMistakesBonus?: number;
   inflationReduction?: number;
-  shieldChargeBonus?: number;
 }
 
 interface NumberUpgradeState {
   digit: number;
-  activeShield?: number;
   momentumStacks?: number;
-  overclockActive?: boolean;
+  onesRevealed?: boolean;
+  shieldCharges?: number;
+  maxShieldCharges?: number;
+  realityWarpUsed?: boolean;
+  purificationUsed?: number;
 }
 
 const upgradeState: Map<number, NumberUpgradeState> = new Map();
@@ -29,6 +28,10 @@ function getUpgradeState(digit: number): NumberUpgradeState {
     upgradeState.set(digit, { digit });
   }
   return upgradeState.get(digit)!;
+}
+
+export function resetUpgradeState(): void {
+  upgradeState.clear();
 }
 
 export function applyRogueUpgradesAtStart(
@@ -47,10 +50,9 @@ export function applyRogueUpgradesAtStart(
     console.log('[RogueUpgrade] Triggering:', upgrade.effect);
 
     switch (upgrade.effect) {
-        case 'scout_omniscience': {
-        console.log('[Scout] Omniscience active - reveals fog on placement');
+      case 'scout_omniscience':
+        console.log('[Scout] Omniscience active - will reveal ones on first placement');
         break;
-      }
 
       case 'merchant_monopoly':
         console.log('[Merchant] Monopoly active - immune to inflation');
@@ -65,8 +67,7 @@ export function applyRogueUpgradesAtStart(
         break;
 
       case 'catalyst_overclock':
-        getUpgradeState(5).overclockActive = true;
-        console.log('[Catalyst] Overclock activated');
+        console.log('[Catalyst] Overclock activated - all numbers +1 level');
         break;
 
       case 'gambler_reality_warp':
@@ -78,16 +79,8 @@ export function applyRogueUpgradesAtStart(
         break;
 
       case 'powerhouse_purification':
-        newGrid = newGrid.map(row => row.map(cell => ({
-          ...cell,
-          corruption: 0,
-          isFogged: false,
-          isHidden: false,
-          candidates: [],
-          lockTurnsRemaining: 0,
-          isLocked: false,
-        })));
-        console.log('[Powerhouse] Purification - cleansed entire board');
+        console.log('[Powerhouse] Purification ready - can be used once');
+        getUpgradeState(8).purificationUsed = 0;
         break;
 
       case 'finisher_completionist':
@@ -97,6 +90,26 @@ export function applyRogueUpgradesAtStart(
   }
 
   return { grid: newGrid, currency: newCurrency };
+}
+
+function getEffectiveLevel(
+  placedNumber: number,
+  effect: string,
+  allUpgrades: Upgrade[]
+): number {
+  const hasOverclock = allUpgrades.some(u => u.effect === 'catalyst_overclock');
+  
+  const effectLevel = effect.includes('_l1') ? 1 :
+                     effect.includes('_l2') ? 2 :
+                     effect.includes('_l3') ? 3 :
+                     effect.includes('_l4') ? 4 :
+                     effect.includes('_l5') ? 5 : 0;
+  
+  if (hasOverclock && placedNumber !== 5) {
+    return Math.min(effectLevel + 1, 5);
+  }
+  
+  return effectLevel;
 }
 
 export function applyNumberUpgradeEffect(
@@ -116,159 +129,70 @@ export function applyNumberUpgradeEffect(
 
   const result: UpgradeEffectResult = { grid };
   const state = getUpgradeState(placedNumber);
+  const effectiveLevel = getEffectiveLevel(placedNumber, upgrade.effect, allUpgrades || []);
+
+  console.log(`[NumberUpgrade] ${upgrade.name} (effective level: ${effectiveLevel})`);
 
   switch (upgrade.effect) {
-    case 'scout_find_naked': {
-      const nakedSingle = findRandomNakedSingle(grid, solution);
-      if (nakedSingle) {
-        const [nRow, nCol] = nakedSingle;
-        const value = solution[nRow][nCol];
-        if (value !== null) {
-          const hasNumberUpgrade = allUpgrades?.some(
-            u => u.type === 'number' && u.number === value
-          );
-          result.grid = grid.map((r, i) =>
-            r.map((c, j) => {
-              if (i === nRow && j === nCol) {
-                if (hasNumberUpgrade) {
-                  return { ...c, candidates: [value] };
-                } else {
-                  return { ...c, isFogged: false };
-                }
-              }
-              return c;
-            })
-          );
-          if (hasNumberUpgrade) {
-            console.log('[Scout L1] Highlighted naked single at', nRow, nCol, 'with pen mark');
-          } else {
-            console.log('[Scout L1] Found naked single at', nRow, nCol, '(no pen mark - upgrade not owned)');
-          }
-        }
-      } else {
-        console.log('[Scout L1] No naked single found');
-      }
-      break;
-    }
-
-    case 'scout_fog_clear': {
-      const nakedSingle = findRandomNakedSingle(grid, solution);
-      if (nakedSingle) {
-        const [nRow, nCol] = nakedSingle;
-        const value = solution[nRow][nCol];
-        if (value !== null) {
-          const hasNumberUpgrade = allUpgrades?.some(
-            u => u.type === 'number' && u.number === value
-          );
-          result.grid = grid.map((r, i) =>
-            r.map((c, j) => {
-              if (i === nRow && j === nCol) {
-                if (hasNumberUpgrade) {
-                  return { ...c, candidates: [value] };
-                } else {
-                  return { ...c, isFogged: false };
-                }
-              }
-              return c;
-            })
-          );
-        }
-      }
+    case 'scout_clear_box_fog': {
       const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
       const cells = getBoxCells(boxIndex);
-      result.grid = clearFogInCells(result.grid, cells);
-      console.log('[Scout L2] Found naked single + cleared fog in box');
+      result.grid = clearFogInCells(grid, cells);
+      console.log('[Scout L1] Cleared fog in 3x3 box');
       break;
     }
 
-    case 'scout_find_hidden': {
-      const hiddenSingle = findRandomHiddenSingle(grid, solution);
-      if (hiddenSingle) {
-        const [hRow, hCol] = hiddenSingle;
-        const value = solution[hRow][hCol];
-        if (value !== null) {
-          const hasNumberUpgrade = allUpgrades?.some(
-            u => u.type === 'number' && u.number === value
-          );
-          result.grid = grid.map((r, i) =>
-            r.map((c, j) => {
-              if (i === hRow && j === hCol) {
-                if (hasNumberUpgrade) {
-                  return { ...c, candidates: [value] };
-                } else {
-                  return { ...c, isFogged: false };
-                }
-              }
-              return c;
-            })
-          );
-          if (hasNumberUpgrade) {
-            console.log('[Scout L3] Highlighted hidden single at', hRow, hCol, 'with pen mark');
-          } else {
-            console.log('[Scout L3] Found hidden single at', hRow, hCol, '(no pen mark - upgrade not owned)');
-          }
-        }
-      } else {
-        console.log('[Scout L3] No hidden single found');
-      }
+    case 'scout_clear_rowcol_fog': {
+      result.grid = clearFogInRow(grid, row);
+      result.grid = clearFogInColumn(result.grid, col);
+      console.log('[Scout L2] Cleared fog in row and column');
       break;
     }
 
-    case 'scout_solve_single': {
-      const hiddenSingle = findRandomHiddenSingle(grid, solution);
-      if (hiddenSingle) {
-        const [hRow, hCol] = hiddenSingle;
-        result.grid = grid.map((r, i) =>
-          r.map((c, j) => {
-            if (i === hRow && j === hCol) {
-              return {
-                ...c,
-                value: solution[hRow][hCol],
-                isCorrect: true,
-                isFixed: false,
-              };
-            }
-            return c;
-          })
-        );
-        console.log('[Scout L4] Solved hidden single at', hRow, hCol);
-      } else {
-        console.log('[Scout L4] No hidden single found');
-      }
+    case 'scout_remove_phantoms': {
+      const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
+      const cells = getBoxCells(boxIndex);
+      result.grid = removePhantomCandidatesInCells(grid, solution, cells);
+      console.log('[Scout L3] Removed phantom candidates from box');
+      break;
+    }
+
+    case 'scout_clarity': {
+      result.grid = revealHiddenInRow(grid, row);
+      result.grid = revealHiddenInColumn(result.grid, col);
+      console.log('[Scout L4] Revealed hidden numbers in row and column');
       break;
     }
 
     case 'scout_total_clarity': {
-      const hiddenSingle = findRandomHiddenSingle(grid, solution);
-      if (hiddenSingle) {
-        const [hRow, hCol] = hiddenSingle;
-        result.grid = grid.map((r, i) =>
-          r.map((c, j) => {
-            if (i === hRow && j === hCol) {
-              return {
-                ...c,
-                value: solution[hRow][hCol],
-                isCorrect: true,
-                isFixed: false,
-              };
-            }
-            return c;
-          })
-        );
-      }
       const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
       const cells = getBoxCells(boxIndex);
-      result.grid = clearFogInCells(result.grid, cells);
+      result.grid = clearFogInCells(grid, cells);
+      result.grid = clearFogInRow(result.grid, row);
+      result.grid = clearFogInColumn(result.grid, col);
+      result.grid = removePhantomCandidatesInCells(result.grid, solution, cells);
       result.grid = revealHiddenInRow(result.grid, row);
       result.grid = revealHiddenInColumn(result.grid, col);
-      console.log('[Scout L5] Total Clarity - solved hidden single + cleared fog + revealed hidden');
+      console.log('[Scout L5] Total Clarity - all effects triggered');
       break;
     }
     
     case 'scout_omniscience': {
+      if (!state.onesRevealed) {
+        result.grid = grid.map((r, i) =>
+          r.map((c, j) => {
+            if (solution[i][j] === 1 && !c.isFixed) {
+              return { ...c, value: 1, isCorrect: true, isFixed: false };
+            }
+            return c;
+          })
+        );
+        state.onesRevealed = true;
+        console.log('[Scout ROGUE] Omniscience - revealed all 1s on the board');
+      }
       const adjacentCells = getAdjacentCells(row, col);
-      result.grid = clearFogInCells(grid, adjacentCells);
-      console.log('[Scout ROGUE] Omniscience - cleared fog in adjacent cells');
+      result.grid = clearFogInCells(result.grid, adjacentCells);
+      console.log('[Scout ROGUE] Cleared fog in adjacent cells');
       break;
     }
 
@@ -283,7 +207,6 @@ export function applyNumberUpgradeEffect(
       break;
 
     case 'merchant_price_check':
-      result.currency = currency;
       result.inflationReduction = 2;
       console.log('[Merchant L3] Price Check -2% inflation');
       break;
@@ -304,27 +227,30 @@ export function applyNumberUpgradeEffect(
       break;
     }
 
-    case 'jester_flow_state':
-      console.log('[Jester L1] Flow State - immune to candidate shuffling (passive)');
-      break;
-
-    case 'jester_lockpick':
-      console.log('[Jester L2] Lockpick - helps break cell locks faster');
-      break;
-
-    case 'jester_rule_of_three': {
-      const numbersInRow = grid[row].filter(c => c.value !== null).length;
-      const numbersInCol = grid.filter(r => r[col].value !== null).length;
-      const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
-      const boxCells = getBoxCells(boxIndex);
-      const numbersInBox = boxCells.filter(([r, c]) => grid[r][c].value !== null).length;
-      
-      if (numbersInRow === 3 || numbersInCol === 3 || numbersInBox === 3) {
-        result.currency = currency + 3;
-        console.log('[Jester L3] Rule of Three! Placed 3rd - +3 gold');
+    case 'jester_trio': {
+      const threesInRow = countNumberInRow(grid, row, 3);
+      const bonus = threesInRow - 1;
+      if (bonus > 0) {
+        result.currency = currency + bonus;
+        console.log(`[Jester L1] Trio: +${bonus} gold`);
       }
       break;
     }
+
+    case 'jester_trio_plus': {
+      const threesInRow = countNumberInRow(grid, row, 3);
+      const threesInCol = countNumberInColumn(grid, col, 3);
+      const bonus = (threesInRow - 1) + (threesInCol - 1);
+      if (bonus > 0) {
+        result.currency = currency + bonus;
+        console.log(`[Jester L2] Trio+: +${bonus} gold`);
+      }
+      break;
+    }
+
+    case 'jester_flow_state':
+      console.log('[Jester L3] Flow State - immune to candidate shuffling (passive)');
+      break;
 
     case 'jester_unstoppable':
       result.grid = grid.map(r => r.map(c => ({
@@ -335,50 +261,63 @@ export function applyNumberUpgradeEffect(
       console.log('[Jester L4] Unstoppable - instantly broke all cell locks');
       break;
 
-    case 'jester_grand_triplet': {
-      const numbersInRow = grid[row].filter(c => c.value !== null).length;
-      const numbersInCol = grid.filter(r => r[col].value !== null).length;
+    case 'jester_full_house': {
+      const threesInRow = countNumberInRow(grid, row, 3);
+      const threesInCol = countNumberInColumn(grid, col, 3);
       const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
-      const boxCells = getBoxCells(boxIndex);
-      const numbersInBox = boxCells.filter(([r, c]) => grid[r][c].value !== null).length;
-      
-      if (numbersInRow === 3 || numbersInCol === 3 || numbersInBox === 3) {
-        result.currency = currency + 6;
-        console.log('[Jester L5] Grand Triplet! Placed 3rd - +6 gold');
+      const threesInBox = countNumberInBox(grid, boxIndex, 3);
+      const bonus = (threesInRow - 1) + (threesInCol - 1) + (threesInBox - 1);
+      if (bonus > 0) {
+        result.currency = currency + bonus;
+        console.log(`[Jester L5] Full House: +${bonus} gold`);
       }
       break;
     }
 
     case 'jester_master_flow': {
-      const hasMasterFlow = allUpgrades?.some(u => u.effect === 'jester_master_flow');
-      if (hasMasterFlow) {
-        result.currency = currency + 6;
-        console.log('[Jester ROGUE] Master of Flow - always triggers Grand Triplet +6 gold');
+      const hiddenSingle = findRandomHiddenSingle(grid, solution);
+      if (hiddenSingle) {
+        const [hRow, hCol] = hiddenSingle;
+        result.grid = grid.map((r, i) =>
+          r.map((c, j) => {
+            if (i === hRow && j === hCol) {
+              return {
+                ...c,
+                value: solution[hRow][hCol],
+                isCorrect: true,
+              };
+            }
+            return c;
+          })
+        );
+        console.log('[Jester ROGUE] Master of Flow - triggered Takedown');
       }
       break;
     }
 
-    case 'fortress_reinforce':
+    case 'fortress_hp_1':
       result.maxMistakesBonus = 1;
-      console.log('[Fortress L1] Reinforce +1 mistake buffer');
+      console.log('[Fortress L1] +1 mistake buffer');
       break;
 
-    case 'fortress_shield_charge':
-      result.shieldChargeBonus = 1;
-      console.log('[Fortress L2] Shield Charge +1 charge');
+    case 'fortress_shield': {
+      const hasL4 = allUpgrades?.some(u => u.number === 4 && u.effect === 'fortress_reinforce');
+      const shieldValue = hasL4 ? 2 : 1;
+      console.log(`[Fortress L2] Shield granted (blocks ${shieldValue} mistakes)`);
       break;
+    }
 
-    case 'fortress_fortify':
+    case 'fortress_hp_2':
       result.maxMistakesBonus = 2;
-      console.log('[Fortress L3] Fortify +2 mistake buffer');
+      console.log('[Fortress L3] +2 mistake buffer (total)');
       break;
 
-    case 'fortress_armory':
-      console.log('[Fortress L4] Armory - max shield charges increased (passive)');
+    case 'fortress_reinforce':
+      console.log('[Fortress L4] Reinforce - shield now blocks 2 mistakes');
       break;
 
-    case 'fortress_bastion':
-      console.log('[Fortress L5] Bastion - start with shield charge (passive)');
+    case 'fortress_start_shield':
+      console.log('[Fortress L5] Bastion - start with shield (passive)');
       break;
 
     case 'catalyst_ignite':
@@ -386,7 +325,7 @@ export function applyNumberUpgradeEffect(
     case 'catalyst_potency':
     case 'catalyst_catalyze':
     case 'catalyst_fusion':
-      console.log(`[Catalyst] ${upgrade.effect} - triggers other abilities`);
+      console.log(`[Catalyst] ${upgrade.effect} will trigger other abilities`);
       break;
 
     case 'gambler_fifty_fifty':
@@ -403,6 +342,10 @@ export function applyNumberUpgradeEffect(
     case 'gambler_safe_bet':
     case 'gambler_all_in':
       console.log(`[Gambler] ${upgrade.effect} - passive protection`);
+      break;
+
+    case 'gambler_reality_warp':
+      console.log('[Gambler ROGUE] Reality Warp - once per puzzle (passive)');
       break;
 
     case 'sniper_reroll_1':
@@ -431,11 +374,7 @@ export function applyNumberUpgradeEffect(
               return c;
             })
           );
-          if (hasNumberUpgrade) {
-            console.log('[Sniper L2] Highlighted hidden single with pen mark');
-          } else {
-            console.log('[Sniper L2] Found hidden single (no pen mark - upgrade not owned)');
-          }
+          console.log('[Sniper L2] Focus Fire - highlighted hidden single');
         }
       }
       break;
@@ -457,7 +396,7 @@ export function applyNumberUpgradeEffect(
             return c;
           })
         );
-        console.log('[Sniper L3] Solved hidden single');
+        console.log('[Sniper L3] Takedown - solved hidden single');
       }
       break;
     }
@@ -478,6 +417,11 @@ export function applyNumberUpgradeEffect(
         })
       );
       console.log(`[Sniper L5] Chain Shot - solved all ${randomDigit}s`);
+      break;
+    }
+
+    case 'sniper_domino': {
+      console.log('[Sniper ROGUE] Domino Effect ready (implemented in chain)');
       break;
     }
 
@@ -520,7 +464,43 @@ export function applyNumberUpgradeEffect(
       const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
       const cells = getBoxCells(boxIndex);
       result.grid = cleanseCorruptionInCells(result.grid, cells, 999);
-      console.log('[Powerhouse L5] System Restore');
+      
+      const scoutUpgrades = (allUpgrades || []).filter(u => u.number === 1);
+      for (const scoutUpgrade of scoutUpgrades) {
+        const scoutResult = applyNumberUpgradeEffect(
+          scoutUpgrade,
+          result.grid,
+          solution,
+          row,
+          col,
+          1,
+          globalCorruption,
+          currency,
+          allUpgrades
+        );
+        result.grid = scoutResult.grid;
+      }
+      
+      console.log('[Powerhouse L5] System Restore - triggered Scout effects');
+      break;
+    }
+
+    case 'powerhouse_purification': {
+      const purificationState = getUpgradeState(8);
+      if (purificationState.purificationUsed === 0) {
+        result.grid = grid.map(r => r.map(c => ({
+          ...c,
+          corruption: 0,
+          isFogged: false,
+          candidates: [],
+          lockTurnsRemaining: 0,
+          isLocked: false,
+        })));
+        purificationState.purificationUsed = 1;
+        console.log('[Powerhouse ROGUE] Purification - cleansed entire board');
+      } else {
+        console.log('[Powerhouse ROGUE] Purification already used this puzzle');
+      }
       break;
     }
 
@@ -546,7 +526,7 @@ export function applyNumberUpgradeEffect(
 
     case 'finisher_momentum':
       state.momentumStacks = (state.momentumStacks || 0) + 1;
-      console.log(`[Finisher L3] Momentum stack ${state.momentumStacks}`);
+      console.log(`[Finisher L3] Momentum stack ${state.momentumStacks} (+${state.momentumStacks}% gold)`);
       break;
 
     case 'finisher_jackpot': {
@@ -560,7 +540,11 @@ export function applyNumberUpgradeEffect(
     }
 
     case 'finisher_head_start':
-      console.log('[Finisher L5] Head Start - bonus in next shop');
+      console.log('[Finisher L5] Head Start - bonus in next shop (passive)');
+      break;
+
+    case 'finisher_completionist':
+      console.log('[Finisher ROGUE] Completionist ready (passive)');
       break;
   }
 
@@ -798,68 +782,6 @@ function isOnlyPlaceInUnit(grid: GameGrid, solution: Grid, row: number, col: num
   }
   
   return false;
-}
-
-function findEmptyCellsForNumber(grid: GameGrid, solution: Grid, number: number): [number, number][] {
-  const cells: [number, number][] = [];
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 9; j++) {
-      if (grid[i][j].value === null && solution[i][j] === number && !grid[i][j].isFixed) {
-        cells.push([i, j]);
-      }
-    }
-  }
-  return cells;
-}
-
-function findRandomNakedSingle(grid: GameGrid, solution: Grid): [number, number] | null {
-  const candidates: [number, number][] = [];
-  
-  for (let row = 0; row < 9; row++) {
-    for (let col = 0; col < 9; col++) {
-      if (grid[row][col].value === null && !grid[row][col].isFixed) {
-        if (isNakedSingle(grid, solution, row, col)) {
-          candidates.push([row, col]);
-        }
-      }
-    }
-  }
-  
-  if (candidates.length === 0) return null;
-  return candidates[Math.floor(Math.random() * candidates.length)];
-}
-
-function isNakedSingle(grid: GameGrid, solution: Grid, row: number, col: number): boolean {
-  const digit = solution[row][col];
-  if (digit === null) return false;
-  
-  const numbersInRow: Set<number> = new Set();
-  const numbersInCol: Set<number> = new Set();
-  const numbersInBox: Set<number> = new Set();
-  
-  for (let i = 0; i < 9; i++) {
-    if (grid[row][i].value !== null) {
-      numbersInRow.add(grid[row][i].value!);
-    }
-    if (grid[i][col].value !== null) {
-      numbersInCol.add(grid[i][col].value!);
-    }
-  }
-  
-  const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
-  const boxCells = getBoxCells(boxIndex);
-  for (const [r, c] of boxCells) {
-    if (grid[r][c].value !== null) {
-      numbersInBox.add(grid[r][c].value!);
-    }
-  }
-  
-  const allNumbers: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-  for (const num of numbersInRow) allNumbers.delete(num);
-  for (const num of numbersInCol) allNumbers.delete(num);
-  for (const num of numbersInBox) allNumbers.delete(num);
-  
-  return allNumbers.size === 1 && allNumbers.has(digit);
 }
 
 function getAdjacentCells(row: number, col: number): [number, number][] {
