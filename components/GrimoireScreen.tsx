@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalScrollView: {
-    maxHeight: 400,
+    flex: 1,
   },
   upgradeRow: {
     borderWidth: BORDER.medium,
