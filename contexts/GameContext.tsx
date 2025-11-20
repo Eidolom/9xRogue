@@ -484,6 +484,17 @@ export const [GameContext, useGame] = createContextHook(() => {
     let newShieldCharges = gameState.shieldCharges;
     const currentMaxShields = gameState.maxShieldCharges;
     
+    if (isCorrectPlacement && num === 4) {
+      const hasShield = gameState.upgrades.some(u => u.effect === 'fortress_shield');
+      const hasReinforce = gameState.upgrades.some(u => u.effect === 'fortress_reinforce');
+      
+      if (hasShield) {
+        const maxShields = hasReinforce ? 2 : 1;
+        newShieldCharges = Math.min(newShieldCharges + maxShields, maxShields);
+        console.log(`[Fortress L2] Shield granted! Charges: ${newShieldCharges}/${maxShields}`);
+      }
+    }
+    
     const goldenDie = gameState.upgrades.find(u => u.effect === 'golden_number');
     if (goldenDie && isCorrectPlacement) {
       const goldenNumber = goldenDie.number || Math.floor(Math.random() * 9) + 1;
@@ -839,6 +850,14 @@ export const [GameContext, useGame] = createContextHook(() => {
       maxMistakesBonus = upgrade.id.includes('reinforced_buffer') ? 1 : 2;
       console.log(`[Purchase] ${upgrade.name} purchased - increasing max mistakes by ${maxMistakesBonus}`);
     }
+    if (upgrade.effect === 'fortress_hp_1') {
+      maxMistakesBonus = 1;
+      console.log('[Purchase] Fortress L1 purchased - +1 max mistake');
+    }
+    if (upgrade.effect === 'fortress_hp_2') {
+      maxMistakesBonus = 2;
+      console.log('[Purchase] Fortress L3 purchased - +2 max mistakes');
+    }
     
     if (upgrade.effect === 'golden_number') {
       const goldenNumber = Math.floor(Math.random() * 9) + 1;
@@ -891,6 +910,18 @@ export const [GameContext, useGame] = createContextHook(() => {
       baseMaxMistakes += bonus;
       console.log(`[NextFloor] ${upgrade.name} active - max mistakes increased by ${bonus}`);
     }
+    
+    const fortressL1 = gameState.upgrades.filter(u => u.effect === 'fortress_hp_1');
+    for (const upgrade of fortressL1) {
+      baseMaxMistakes += 1;
+      console.log('[Fortress L1] Passive +1 max mistake');
+    }
+    
+    const fortressL3 = gameState.upgrades.filter(u => u.effect === 'fortress_hp_2');
+    for (const upgrade of fortressL3) {
+      baseMaxMistakes += 2;
+      console.log('[Fortress L3] Passive +2 max mistakes (total)');
+    }
 
     let startCurrency = gameState.currency;
     const rogueResult = applyRogueUpgradesAtStart(grid, solution, gameState.upgrades, startCurrency);
@@ -903,16 +934,18 @@ export const [GameContext, useGame] = createContextHook(() => {
     let newMaxShieldCharges = 0;
     let newShieldCharges = 0;
     
-    if (gameState.upgrades.some(u => u.effect === 'fortress_shield_charge')) {
-      newMaxShieldCharges = 1;
+    const hasShield = gameState.upgrades.some(u => u.effect === 'fortress_shield');
+    const hasReinforce = gameState.upgrades.some(u => u.effect === 'fortress_reinforce');
+    const hasBastion = gameState.upgrades.some(u => u.effect === 'fortress_start_shield');
+    
+    if (hasShield) {
+      newMaxShieldCharges = hasReinforce ? 2 : 1;
+      console.log(`[Fortress L2] Shield system active (capacity: ${newMaxShieldCharges})`);
     }
-    if (gameState.upgrades.some(u => u.effect === 'fortress_armory')) {
-      newMaxShieldCharges = 2;
-    }
-    if (gameState.upgrades.some(u => u.effect === 'fortress_bastion')) {
-      newMaxShieldCharges = 3;
+    
+    if (hasBastion) {
       newShieldCharges = 1;
-      console.log('[Fortress] Bastion active - starting with 1 shield charge');
+      console.log('[Fortress L5] Bastion active - starting with 1 shield charge');
     }
 
     setGameState(prev => ({
