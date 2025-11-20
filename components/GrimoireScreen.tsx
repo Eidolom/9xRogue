@@ -476,11 +476,10 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '100%',
     maxWidth: 400,
-    maxHeight: '80%',
+    height: '80%',
     borderWidth: BORDER.thick,
     borderColor: COLORS.primary.cyan,
     position: 'relative',
-    flexDirection: 'column',
   },
   modalClose: {
     position: 'absolute',
@@ -515,7 +514,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalScrollView: {
-    flex: 1,
+    flexGrow: 0,
+    flexShrink: 1,
   },
   upgradeRow: {
     borderWidth: BORDER.medium,
