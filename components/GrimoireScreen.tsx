@@ -252,31 +252,79 @@ export default function GrimoireScreen({ visible = true, onClose }: GrimoireScre
         animationType="fade"
         onRequestClose={() => setSelectedNumber(null)}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setSelectedNumber(null)}
-        >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setSelectedNumber(null)}
+          />
           <View style={styles.modalContent}>
             {selectedNumber !== null && (
               <>
-                <TouchableOpacity 
-                  style={styles.modalClose}
-                  onPress={() => setSelectedNumber(null)}
-                >
-                  <X size={20} color={COLORS.accent.red} />
-                </TouchableOpacity>
+                <View style={styles.modalHeaderSection}>
+                  <TouchableOpacity 
+                    style={styles.modalClose}
+                    onPress={() => setSelectedNumber(null)}
+                  >
+                    <X size={24} color={COLORS.text.primary} />
+                  </TouchableOpacity>
 
-                <View style={styles.modalHeader}>
-                  <View style={[styles.modalNumberBadge, { backgroundColor: COLORS.primary.cyan }]}>
-                    <PixelIcon number={selectedNumber} size={32} color="#000000" />
+                  <View style={styles.modalTopBanner}>
+                    <View style={styles.modalNumberDisplay}>
+                      <View style={[styles.modalNumberBadge, { 
+                        backgroundColor: getCurrentLevel(selectedNumber) >= 5 ? COLORS.accent.magenta : COLORS.primary.cyan 
+                      }]}>
+                        <PixelIcon number={selectedNumber} size={48} color="#000000" />
+                      </View>
+                      <View style={styles.numberNameContainer}>
+                        <Text style={styles.modalNumberLabel}>NUMBER</Text>
+                        <Text style={styles.modalNumberValue}>{selectedNumber}</Text>
+                      </View>
+                    </View>
+                    
+                    <View style={styles.progressSection}>
+                      <View style={styles.levelProgress}>
+                        {[1, 2, 3, 4, 5].map(l => {
+                          const currentLevel = getCurrentLevel(selectedNumber);
+                          return (
+                            <View key={l} style={styles.progressDotContainer}>
+                              <View
+                                style={[
+                                  styles.progressDot,
+                                  {
+                                    backgroundColor: l <= currentLevel 
+                                      ? (currentLevel >= 5 ? COLORS.accent.magenta : COLORS.primary.cyan)
+                                      : COLORS.background.secondary,
+                                    borderColor: l <= currentLevel 
+                                      ? (currentLevel >= 5 ? COLORS.accent.magenta : COLORS.primary.cyan)
+                                      : COLORS.text.muted,
+                                  }
+                                ]}
+                              />
+                              {l < 5 && <View style={[
+                                styles.progressLine,
+                                {
+                                  backgroundColor: l < currentLevel 
+                                    ? (currentLevel >= 5 ? COLORS.accent.magenta : COLORS.primary.cyan)
+                                    : COLORS.text.muted,
+                                }
+                              ]} />}
+                            </View>
+                          );
+                        })}
+                      </View>
+                      <Text style={styles.levelProgressText}>
+                        {getCurrentLevel(selectedNumber) >= 5 ? '★ MAXED ★' : `LEVEL ${getCurrentLevel(selectedNumber)}/5`}
+                      </Text>
+                    </View>
                   </View>
-                  <Text style={styles.modalTitle}>NUMBER {selectedNumber}</Text>
                 </View>
 
-                <View style={styles.modalDivider} />
-
-                <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={false}>
+                <ScrollView 
+                  style={styles.modalScrollView} 
+                  contentContainerStyle={styles.modalScrollContent}
+                  showsVerticalScrollIndicator={false}
+                >
                   {NUMBER_UPGRADES_CATALOG[selectedNumber].map((upgrade, index) => {
                     const currentLevel = getCurrentLevel(selectedNumber);
                     const isOwned = currentLevel >= upgrade.level;
@@ -288,47 +336,91 @@ export default function GrimoireScreen({ visible = true, onClose }: GrimoireScre
                       <View
                         key={upgrade.level}
                         style={[
-                          styles.upgradeRow,
+                          styles.upgradeCard,
                           {
-                            borderColor: isOwned ? COLORS.primary.cyan : isNext ? COLORS.accent.amber : COLORS.text.muted,
-                            backgroundColor: isOwned ? 'rgba(93, 188, 210, 0.12)' : COLORS.background.primary,
+                            borderColor: isOwned 
+                              ? COLORS.primary.cyan 
+                              : isNext && canAfford
+                                ? COLORS.accent.amber
+                                : COLORS.text.muted,
+                            backgroundColor: isOwned 
+                              ? 'rgba(93, 188, 210, 0.15)' 
+                              : isNext 
+                                ? 'rgba(230, 176, 76, 0.08)'
+                                : COLORS.background.primary,
                           }
                         ]}
                       >
-                        <View style={styles.upgradeHeader}>
-                          <View style={[styles.levelBadge, { 
-                            backgroundColor: isOwned ? COLORS.primary.cyan : isNext ? COLORS.accent.amber : COLORS.text.muted 
-                          }]}>
-                            <Text style={styles.levelBadgeText}>L{upgrade.level}</Text>
+                        <View style={styles.upgradeCardHeader}>
+                          <View style={styles.upgradeCardLeft}>
+                            <View style={[
+                              styles.levelCircle, 
+                              { 
+                                backgroundColor: isOwned 
+                                  ? COLORS.primary.cyan 
+                                  : isNext && canAfford
+                                    ? COLORS.accent.amber
+                                    : COLORS.background.secondary,
+                                borderColor: isOwned 
+                                  ? COLORS.primary.cyan 
+                                  : isNext
+                                    ? COLORS.accent.amber
+                                    : COLORS.text.muted,
+                              }
+                            ]}>
+                              <Text style={[
+                                styles.levelCircleText,
+                                { color: isOwned || (isNext && canAfford) ? '#000000' : COLORS.text.muted }
+                              ]}>{upgrade.level}</Text>
+                            </View>
+                            <View style={styles.upgradeNameSection}>
+                              <Text style={[
+                                styles.upgradeCardName,
+                                { color: isOwned ? COLORS.primary.cyan : COLORS.text.primary }
+                              ]}>{upgrade.name}</Text>
+                              {isOwned && (
+                                <View style={styles.ownedBadge}>
+                                  <Text style={styles.ownedBadgeText}>✓ ACTIVE</Text>
+                                </View>
+                              )}
+                              {isLocked && (
+                                <View style={[styles.ownedBadge, { backgroundColor: COLORS.background.secondary }]}>
+                                  <Text style={[styles.ownedBadgeText, { color: COLORS.text.muted }]}>🔒 LOCKED</Text>
+                                </View>
+                              )}
+                            </View>
                           </View>
-                          <Text style={styles.upgradeName}>{upgrade.name}</Text>
                         </View>
 
-                        <Text style={styles.upgradeDescription}>{upgrade.description}</Text>
+                        <Text style={styles.upgradeCardDescription}>{upgrade.description}</Text>
 
-                        <View style={styles.upgradeFooter}>
-                          <Text style={styles.upgradeCost}>{upgrade.cost} GOLD</Text>
-                          {isOwned && (
-                            <Text style={[styles.upgradeStatus, { color: COLORS.primary.cyan }]}>OWNED</Text>
-                          )}
+                        <View style={styles.upgradeCardFooter}>
+                          <View style={styles.costContainer}>
+                            <Zap size={14} color={COLORS.accent.amber} />
+                            <Text style={styles.costValue}>{upgrade.cost}</Text>
+                            <Text style={styles.costLabel}>GOLD</Text>
+                          </View>
+                          
                           {isNext && !isOwned && (
                             <TouchableOpacity
-                              style={[styles.buyButton, { 
-                                backgroundColor: canAfford ? COLORS.primary.cyan : COLORS.background.secondary,
-                                borderColor: canAfford ? COLORS.primary.cyan : COLORS.text.muted,
-                              }]}
+                              style={[
+                                styles.purchaseButton, 
+                                { 
+                                  backgroundColor: canAfford ? COLORS.primary.cyan : COLORS.background.secondary,
+                                  borderColor: canAfford ? COLORS.primary.cyan : COLORS.text.muted,
+                                }
+                              ]}
                               onPress={() => handlePurchase(selectedNumber, upgrade.level)}
                               disabled={!canAfford}
+                              activeOpacity={0.7}
                             >
-                              <Text style={[styles.buyButtonText, { 
-                                color: canAfford ? '#000000' : COLORS.text.muted 
-                              }]}>
-                                {canAfford ? 'BUY' : 'LOCKED'}
+                              <Text style={[
+                                styles.purchaseButtonText, 
+                                { color: canAfford ? '#000000' : COLORS.text.muted }
+                              ]}>
+                                {canAfford ? '▶ PURCHASE' : '✕ INSUFFICIENT GOLD'}
                               </Text>
                             </TouchableOpacity>
-                          )}
-                          {isLocked && (
-                            <Text style={[styles.upgradeStatus, { color: COLORS.text.muted }]}>LOCKED</Text>
                           )}
                         </View>
                       </View>
@@ -338,7 +430,7 @@ export default function GrimoireScreen({ visible = true, onClose }: GrimoireScre
               </>
             )}
           </View>
-        </TouchableOpacity>
+        </View>
       </Modal>
       </View>
     </Modal>
@@ -466,119 +558,205 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.92)',
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   modalContent: {
     backgroundColor: COLORS.background.primary,
-    padding: 20,
-    width: '100%',
-    maxWidth: 400,
-    height: '80%',
+    width: '90%',
+    maxWidth: 420,
+    maxHeight: '90%',
     borderWidth: BORDER.thick,
     borderColor: COLORS.primary.cyan,
     position: 'relative',
   },
+  modalHeaderSection: {
+    backgroundColor: COLORS.background.primary,
+    borderBottomWidth: BORDER.thick,
+    borderBottomColor: COLORS.primary.cyan,
+  },
   modalClose: {
     position: 'absolute',
-    top: 12,
-    right: 12,
+    top: 16,
+    right: 16,
     zIndex: 10,
-    padding: 4,
+    padding: 8,
+    backgroundColor: COLORS.background.secondary,
+    borderWidth: BORDER.medium,
+    borderColor: COLORS.text.muted,
   },
-  modalHeader: {
+  modalTopBanner: {
+    padding: 20,
+    gap: 16,
+  },
+  modalNumberDisplay: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
+    gap: 16,
   },
   modalNumberBadge: {
-    width: 48,
-    height: 48,
+    width: 72,
+    height: 72,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: BORDER.medium,
+    borderWidth: BORDER.thick,
     borderColor: COLORS.background.primary,
   },
-  modalTitle: {
-    fontSize: 18,
+  numberNameContainer: {
+    gap: 2,
+  },
+  modalNumberLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.text.muted,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    letterSpacing: 2,
+  },
+  modalNumberValue: {
+    fontSize: 36,
     fontWeight: '700',
     color: COLORS.text.primary,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
-  modalDivider: {
-    height: 2,
-    backgroundColor: COLORS.primary.cyan,
-    marginBottom: 16,
+  progressSection: {
+    gap: 8,
   },
-  modalScrollView: {
-    flexGrow: 0,
-    flexShrink: 1,
-  },
-  upgradeRow: {
-    borderWidth: BORDER.medium,
-    padding: 12,
-    marginBottom: 12,
-  },
-  upgradeHeader: {
+  levelProgress: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
   },
-  levelBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderWidth: BORDER.thin,
-    borderColor: COLORS.background.primary,
+  progressDotContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  levelBadgeText: {
-    fontSize: 10,
+  progressDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 0,
+    borderWidth: BORDER.medium,
+  },
+  progressLine: {
+    width: 24,
+    height: 2,
+  },
+  levelProgressText: {
+    fontSize: 12,
     fontWeight: '700',
-    color: '#000000',
+    color: COLORS.text.secondary,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    letterSpacing: 2,
+  },
+  modalScrollView: {
+    flex: 1,
+  },
+  modalScrollContent: {
+    padding: 16,
+    gap: 12,
+  },
+  upgradeCard: {
+    borderWidth: BORDER.thick,
+    padding: 16,
+    gap: 12,
+  },
+  upgradeCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  upgradeCardLeft: {
+    flexDirection: 'row',
+    gap: 12,
+    flex: 1,
+  },
+  levelCircle: {
+    width: 40,
+    height: 40,
+    borderWidth: BORDER.thick,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  levelCircleText: {
+    fontSize: 18,
+    fontWeight: '700',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
-  upgradeName: {
+  upgradeNameSection: {
+    flex: 1,
+    gap: 6,
+  },
+  upgradeCardName: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    lineHeight: 20,
+  },
+  ownedBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(93, 188, 210, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderWidth: BORDER.thin,
+    borderColor: COLORS.primary.cyan,
+  },
+  ownedBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.primary.cyan,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    letterSpacing: 1,
+  },
+  upgradeCardDescription: {
+    fontSize: 12,
+    color: COLORS.text.secondary,
+    lineHeight: 18,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  upgradeCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  costContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.background.secondary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: BORDER.medium,
+    borderColor: COLORS.text.muted,
+  },
+  costValue: {
     fontSize: 13,
     fontWeight: '700',
     color: COLORS.text.primary,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
-  upgradeDescription: {
-    fontSize: 11,
-    color: COLORS.text.secondary,
-    lineHeight: 16,
-    marginBottom: 8,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-  },
-  upgradeFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  upgradeCost: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.text.primary,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-  },
-  upgradeStatus: {
+  costLabel: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
+    color: COLORS.text.muted,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    letterSpacing: 1,
   },
-  buyButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: BORDER.medium,
+  purchaseButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderWidth: BORDER.thick,
   },
-  buyButtonText: {
+  purchaseButtonText: {
     fontSize: 11,
     fontWeight: '700',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
 });
