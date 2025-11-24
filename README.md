@@ -10,13 +10,13 @@ There are no timers. There are no reflex checks. There is only the board, your b
 
 ## 📖 Table of Contents
 
-  - [Core Concept](https://www.google.com/search?q=%23-core-concept)
-  - [The Threat System](https://www.google.com/search?q=%23-the-threat-system)
-  - [The Numbers (Classes)](https://www.google.com/search?q=%23-the-numbers-classes)
-  - [The Shop & Economy](https://www.google.com/search?q=%23-the-shop--economy)
-  - [How to Play](https://www.google.com/search?q=%23-how-to-play)
-  - [Installation & Development](https://www.google.com/search?q=%23-installation--development)
-  - [Design Philosophy](https://www.google.com/search?q=%23-design-philosophy)
+  - [Core Concept]
+  - [The Threat System]
+  - [The Numbers (Classes)]
+  - [The Shop & Economy]
+  - [How to Play]
+  - [Installation & Development]
+  - [Design Philosophy]
 
 -----
 
