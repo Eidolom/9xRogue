@@ -14,7 +14,7 @@ There are no timers. There are no reflex checks. There is only the board, your b
   - [The Threat System](https://github.com/Eidolom/9x-rogue-816/blob/main/README.md#-core-concept)
   - [The Numbers (Classes)](https://github.com/Eidolom/9x-rogue-816/blob/main/README.md#-core-concept)
   - [The Shop & Economy](https://github.com/Eidolom/9x-rogue-816/blob/main/README.md#-core-concept)
-  - [How to Play]
+  - [How to Play](https://github.com/Eidolom/9x-rogue-816/blob/main/README.md#-core-concept)
   - [Installation & Development]
   - [Design Philosophy]
 
