@@ -43,7 +43,7 @@ You need Node.js & Bun installed.
 
 1. Clone & Install
 
-git clone [https://github.com/yourusername/9x-rogue.git](https://github.com/yourusername/9x-rogue.git)
+git clone [https://github.com/yourusername/9x-rogue.git](https://github.com/Eidolom/9x-rogue.git)
 cd 9x-rogue
 bun i
 
