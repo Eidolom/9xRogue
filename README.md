@@ -3,7 +3,7 @@
 "What if Sudoku fought back?"
 A mobile-first logic puzzle game that fuses constraint-based problem solving with roguelike progression mechanics.
 
-📖 The Concept
+The Concept
 
 9x Rogue reimags the classic Sudoku grid as a dungeon map.
 
@@ -17,7 +17,7 @@ The Roguelike: Enemies, loot, and traps are procedurally placed based on the num
 
 I built this to challenge myself with complex algorithmic generation (creating valid Sudoku grids on the fly) and state management (inventory/permadeath) within a mobile architecture.
 
-🧠 Engineering Challenges
+Engineering Challenges
 
 1. Procedural Generation (Backtracking)
 
@@ -33,7 +33,7 @@ Turn-Based Logic: Every move validates against Sudoku rules and updates enemy st
 
 Persistence: Robust local storage integration to handle "Run" saves while enforcing strict permadeath rules.
 
-🛠️ Development Setup
+Development Setup
 
 This app was initialized with Rork (Expo Router + React Native).
 
@@ -41,58 +41,3 @@ Prerequisites
 
 You need Node.js & Bun installed.
 
-1. Clone & Install
-
-git clone [https://github.com/yourusername/9x-rogue.git](https://github.com/Eidolom/9x-rogue.git)
-cd 9x-rogue
-bun i
-
-
-2. Run the App
-
-For iOS (Simulator):
-
-bun run start
-# Then press "i" in the terminal
-
-
-For Android (Emulator):
-
-bun run start -- --android
-
-
-For Web (Browser Preview):
-
-bun run start-web
-
-
-🚀 Deployment (Rork / EAS)
-
-This project uses EAS (Expo Application Services) for building native binaries.
-
-Publish to App Store / Google Play
-
-# 1. Install EAS CLI
-bun i -g @expo/eas-cli
-
-# 2. Configure project
-eas build:configure
-
-# 3. Build for iOS/Android
-eas build --platform ios
-eas build --platform android
-
-
-Publish to Web
-
-eas build --platform web
-eas hosting:deploy
-
-
-📬 Context
-
-Simon John - Lead Developer
-
-LinkedIn: linkedin.com/in/simon-john-regensburg
-
-Goal: Exploring the intersection of Algorithmic Complexity and Mobile UX.
